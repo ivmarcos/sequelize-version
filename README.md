@@ -1,16 +1,16 @@
-[![Build Status](https://travis-ci.org/ivmarcos/sequelize-versionify.svg?branch=master)](https://travis-ci.org/ivmarcos/sequelize-versionify)
+[![Build Status](https://travis-ci.org/ivmarcos/sequelize-version.svg?branch=master)](https://travis-ci.org/ivmarcos/sequelize-version)
 
-# sequelize-versionify
-Automatically versionify your sequelize models
+# sequelize-version
+Automatically version your sequelize models
 
 ## Installation
 
 ```shell
-npm i sequelize-versionify
+npm i sequelize-version
 ```
 or
 ```shell
-yarn add sequelize-versionify
+yarn add sequelize-version
 ```
 ## Features
 
@@ -21,7 +21,7 @@ yarn add sequelize-versionify
 ## Basic Usage
 ```js
 const Sequelize = require('sequelize');
-const Version = require('sequelize-versionify');
+const Version = require('sequelize-version');
 
 const sequelize = new Sequelize(...);
 

@@ -1,12 +1,12 @@
 {
-  "name": "sequelize-versionify",
+  "name": "sequelize-version",
   "version": "0.0.1",
-  "description": "Versionify sequelize models",
+  "description": "Version sequelize models",
   "main": "index.js",
   "keywords": [
     "sequelize",
     "version",
-    "versionify",
+    "version",
     "audit",
     "log"
   ],
@@ -16,14 +16,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ivmarcos/sequelize-versionify.git"
+    "url": "git+https://github.com/ivmarcos/sequelize-version.git"
   },
   "author": "Marcos Andrei Ivanechtchuk",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ivmarcos/sequelize-versionify/issues"
+    "url": "https://github.com/ivmarcos/sequelize-version/issues"
   },
-  "homepage": "https://github.com/ivmarcos/sequelize-versionify#readme",
+  "homepage": "https://github.com/ivmarcos/sequelize-version#readme",
   "devDependencies": {
     "babel-cli": "^6.24.1",
     "babel-preset-es2015": "^6.24.1",
