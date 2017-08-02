@@ -45,7 +45,7 @@ var hooks = ['afterCreate', 'afterUpdate', 'afterSave', 'afterDestroy'];
 function Version(model, customOptions) {
     var _versionAttrs;
 
-    var options = Object.assign({}, this.defaults, customOptions);
+    var options = Object.assign({}, Version.defaults, customOptions);
 
     var prefix = options.prefix;
 
@@ -58,18 +58,17 @@ function Version(model, customOptions) {
         primaryKey: true,
         autoIncrement: true
     }), _defineProperty(_versionAttrs, prefix + '_type', {
-            type: Sequelize.INTEGER
-        }), _defineProperty(_versionAttrs, prefix + '_timestamp', {
-            type: Sequelize.DATE,
-            defaultValue: new Date()
-        }), _versionAttrs);
+        type: Sequelize.INTEGER
+    }), _defineProperty(_versionAttrs, prefix + '_timestamp', {
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW
+    }), _versionAttrs);
 
     var cloneModelAttrs = cloneAttrs(model);
 
     var versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
 
     primaryKeys.forEach(function (pk) {
-        if (model.attributes[pk] === versionModelAttrs[pk]) throw new Error('cannot be the same attr.');
         delete versionModelAttrs[pk].autoIncrement;
         delete versionModelAttrs[pk].primaryKey;
     });
@@ -90,12 +89,12 @@ function Version(model, customOptions) {
             var versionType = VersionType.CREATE;
 
             switch (hook) {
-            case 'afterUpdate':case 'afterSave':
-                versionType = VersionType.UPDATE;
-                break;
-            case 'afterDestroy':
-                versionType = VersionType.DELETE;
-                break;
+                case 'afterUpdate':case 'afterSave':
+                    versionType = VersionType.UPDATE;
+                    break;
+                case 'afterDestroy':
+                    versionType = VersionType.DELETE;
+                    break;
             }
 
             var data = JSON.parse(JSON.stringify(instanceData));
@@ -106,12 +105,10 @@ function Version(model, customOptions) {
         });
     });
 
-    versionModel.VersionType = VersionType;
-    versionModel.defaults;
-
     return versionModel;
 }
 
-Version.prototype.defaults = defaults;
+Version.defaults = defaults;
+Version.VersionType = VersionType;
 
 module.exports = Version;
