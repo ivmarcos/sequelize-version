@@ -22,14 +22,30 @@ function getPrimaryKeys(model) {
     return primaryKeys;
 }
 
-var defaultOptions = {
+function cloneAttrs(model) {
+    return Object.keys(model.attributes).map(function (attr) {
+        return _defineProperty({}, attr, Object.assign({}, model.attributes[attr]));
+    }).reduce(function (a, b) {
+        return Object.assign(a, b);
+    });
+}
+
+var VersionType = {
+    CREATE: 1,
+    UPDATE: 2,
+    DELETE: 3
+};
+
+var defaults = {
     prefix: 'version'
 };
 
-module.exports = function (model, customOptions) {
-    var _versionExclusiveAttr;
+var hooks = ['afterCreate', 'afterUpdate', 'afterSave', 'afterDestroy'];
 
-    var options = Object.assign({}, defaultOptions, customOptions);
+function Version(model, customOptions) {
+    var _versionAttrs;
+
+    var options = Object.assign({}, this.defaults, customOptions);
 
     var prefix = options.prefix;
 
@@ -37,21 +53,27 @@ module.exports = function (model, customOptions) {
 
     var primaryKeys = getPrimaryKeys(model);
 
-    var versionExclusiveAttrs = (_versionExclusiveAttr = {}, _defineProperty(_versionExclusiveAttr, prefix + '_id', {
+    var versionAttrs = (_versionAttrs = {}, _defineProperty(_versionAttrs, prefix + '_id', {
         type: Sequelize.BIGINT,
         primaryKey: true,
         autoIncrement: true
-    }), _defineProperty(_versionExclusiveAttr, prefix + 'Type_id', {
+    }), _defineProperty(_versionAttrs, prefix + '_type', {
         type: Sequelize.INTEGER
-    }), _versionExclusiveAttr);
+    }), _defineProperty(_versionAttrs, prefix + '_timestamp', {
+        type: Sequelize.DATE,
+        defaultValue: new Date()
+    }), _versionAttrs);
 
-    var versionModelAttrs = Object.assign({}, model.attributes, versionExclusiveAttrs);
+    var cloneModelAttrs = cloneAttrs(model);
+
+    var versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
 
     primaryKeys.forEach(function (pk) {
-        versionModelAttrs[pk].autoIncrement = false;
+        delete versionModelAttrs[pk].autoIncrement;
+        delete versionModelAttrs[pk].primaryKey;
     });
 
-    var tableName = prefix.toLowerCase() + '_' + model.options.tableName;
+    var tableName = prefix.toLowerCase() + '_' + (model.options.tableName || model.name.toLowerCase());
 
     var versionModelOptions = {
         schema: model.options.schema,
@@ -59,14 +81,6 @@ module.exports = function (model, customOptions) {
     };
 
     var versionModel = model.sequelize.define(versionModelName, versionModelAttrs, versionModelOptions);
-
-    var hooks = ['afterCreate', 'afterUpdate', 'afterSave', 'afterDestroy'];
-
-    var VersionType = {
-        CREATE: 1,
-        UPDATE: 2,
-        DELETE: 3
-    };
 
     hooks.forEach(function (hook) {
 
@@ -85,13 +99,18 @@ module.exports = function (model, customOptions) {
 
             var data = JSON.parse(JSON.stringify(instanceData));
 
-            var versionData = Object.assign({}, data, _defineProperty({}, prefix + 'Type_id', versionType));
+            var versionData = Object.assign({}, data, _defineProperty({}, prefix + '_type', versionType));
 
             return versionModel.build(versionData).save();
         });
     });
 
     versionModel.VersionType = VersionType;
+    versionModel.defaults;
 
     return versionModel;
-};
+}
+
+Version.prototype.defaults = defaults;
+
+module.exports = Version;

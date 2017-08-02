@@ -12,7 +12,8 @@
   ],
   "scripts": {
     "test": "mocha",
-    "build": "babel lib -o index.js"
+    "build": "babel lib -o index.js",
+    "prepublish": "npm run test && npm run build"
   },
   "repository": {
     "type": "git",

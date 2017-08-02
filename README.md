@@ -67,14 +67,14 @@ console.log(JSON.parse(JSON.stringify(versions)));
     {
         version_id: 1,
         version_type: 1,
-        version_timestamp: 100020200,
+        version_timestamp: 2017-08-02T16:08:09.956Z,
         id: 1,
         name: 'Jack'
     },
     {
         version_id: 2,
         version_type: 1,
-        version_timestamp: 100020200,
+        version_timestamp: 2017-08-02T16:18:09.958Z,
         id: 1,
         name: 'Jack Johnson'
     },
