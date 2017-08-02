@@ -32,7 +32,7 @@ before(done => {
 
 describe('sequelize-version', () => {
 
-    it ('works', done => {
+    it ('basic usage', done => {
 
         const teste = async() => {
 
@@ -56,5 +56,6 @@ describe('sequelize-version', () => {
         teste().then(result => done(result)).catch(err => done(err));
 
     })
+
 
 });

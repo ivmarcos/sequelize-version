@@ -25,21 +25,13 @@ const Version = require('sequelize-version');
 
 const sequelize = new Sequelize(...);
 
-// regular model of sequelize
-const Person = sequelize.define('Person', {
-    id: {
-        type: Sequelize.BIGINT,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    name: {
-        type: Sequelize.STRING
-    },
-});
+const Person = sequelize.define('Person', ...);
 
-// version model of sequelize (model cloned with some extra attributes)
 const PersonVersion = new Version(Person);
+```
 
+## Examples
+```js
 // let's create a person for test
 let person = await Person.build({name: 'Jack'}).save();
 
@@ -89,10 +81,6 @@ console.log(JSON.parse(JSON.stringify(versions)));
 
 ]
 */
-
-
-
-
 ```
 
 
