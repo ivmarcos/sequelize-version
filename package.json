@@ -13,7 +13,9 @@
   "scripts": {
     "test": "mocha",
     "build": "babel lib -o index.js",
-    "prepublish": "npm run test && npm run build"
+    "prerelease": "npm run test && npm run build",
+    "prepublish":  "yarn release",
+    "release": "yarn version --new-version patch"
   },
   "repository": {
     "type": "git",
