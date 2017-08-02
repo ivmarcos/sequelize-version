@@ -1,6 +1,6 @@
 {
   "name": "sequelize-version",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Automatically version (audit, log) your sequelize models",
   "main": "index.js",
   "keywords": [
@@ -14,7 +14,7 @@
     "test": "mocha",
     "build": "babel lib -o index.js",
     "prerelease": "npm run test && npm run build",
-    "prepublish":  "yarn release",
+    "prepublish": "yarn release",
     "release": "yarn version --new-version patch"
   },
   "repository": {
