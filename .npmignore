@@ -1,2 +1,8 @@
 node_modules
 yarn.lock
+.travis.yml
+lib
+test
+.eslintrc.json
+.babelrc
+.gitignore
