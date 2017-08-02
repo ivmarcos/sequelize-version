@@ -33,6 +33,6 @@
     "pg": "6.1.5"
   },
   "dependencies": {
-    "sequelize": "3.30.4"
+    "sequelize": "^4.4.2"
   }
 }
