@@ -12,10 +12,7 @@
   ],
   "scripts": {
     "test": "mocha",
-    "build": "babel lib -o index.js",
-    "prerelease": "npm run test && npm run build",
-    "prepublish": "yarn release",
-    "release": "yarn version --new-version patch"
+    "build": "babel lib -o index.js"
   },
   "repository": {
     "type": "git",

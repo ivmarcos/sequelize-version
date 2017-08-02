@@ -58,4 +58,5 @@ describe('sequelize-version', () => {
     })
 
 
+
 });
