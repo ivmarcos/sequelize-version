@@ -29,9 +29,10 @@
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "eslint": "^4.3.0",
-    "mocha": "^3.5.0"
+    "mocha": "^3.5.0",
+    "pg": "6.1.5"
   },
   "dependencies": {
-    "sequelize": "^4.4.2"
+    "sequelize": "3.30.4"
   }
 }

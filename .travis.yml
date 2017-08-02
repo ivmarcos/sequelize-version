@@ -4,3 +4,12 @@ node_js:
 install:
   - yarn
 cache: yarn
+service:
+  - postgresql
+before_script:
+  - psql -c 'create database travis_ci_test;' -U postgres
+env:
+  - DB_TEST=travis_ci_test
+  - DB_USER=postgres
+  - DB_PWD=
+  - DB_HOST=localhost
