@@ -26,7 +26,6 @@ const TestModel = sequelize.define('test', {
         allowNull: false,
         defaultValue: 'test defaultValue',
         unique: true,
-        defaultValue: 'test defaultValue'
     },
     simple: Sequelize.STRING,
     createdAt: Sequelize.DATE,

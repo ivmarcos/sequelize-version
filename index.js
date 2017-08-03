@@ -8,32 +8,36 @@ function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-function getPrimaryKeys(model) {
+function cloneAttrs(model, attrs) {
 
-    var primaryKeys = [];
+    var clone = {};
 
-    for (var p in model.attributes) {
+    var attributes = model.attributes;
 
-        var attr = model.attributes[p];
+    if (typeof attributes === 'string' || typeof attributes === 'function') return attributes;
 
-        if (attr.primaryKey) primaryKeys.push(p);
+    for (var p in attributes) {
+
+        var nestedClone = {};
+
+        var attribute = attributes[p];
+
+        for (var np in attribute) {
+            if (attrs.indexOf(np) > -1) {
+                nestedClone[np] = attribute[np];
+            }
+        }
+
+        clone[p] = nestedClone;
     }
 
-    return primaryKeys;
-}
-
-function cloneAttrs(model) {
-    return Object.keys(model.attributes).map(function (attr) {
-        return _defineProperty({}, attr, Object.assign({}, model.attributes[attr]));
-    }).reduce(function (a, b) {
-        return Object.assign(a, b);
-    });
+    return clone;
 }
 
 var VersionType = {
-    CREATE: 1,
-    UPDATE: 2,
-    DELETE: 3
+    CREATED: 1,
+    UPDATED: 2,
+    DELETED: 3
 };
 
 var defaults = {
@@ -41,7 +45,8 @@ var defaults = {
     suffix: ''
 };
 
-var hooks = ['afterCreate', 'afterUpdate', 'afterSave', 'afterDestroy'];
+var hooks = ['afterUpdate', 'afterCreate', 'afterDestroy'];
+var attrsToClone = ['type', 'field'];
 
 function Version(model, customOptions) {
     var _versionAttrs;
@@ -53,7 +58,7 @@ function Version(model, customOptions) {
 
     var versionModelName = '' + capitalize(prefix) + capitalize(model.name);
 
-    var primaryKeys = getPrimaryKeys(model);
+    //const primaryKeys = getPrimaryKeys(model);
 
     var versionAttrs = (_versionAttrs = {}, _defineProperty(_versionAttrs, prefix + '_id', {
         type: Sequelize.BIGINT,
@@ -66,14 +71,9 @@ function Version(model, customOptions) {
         defaultValue: Sequelize.NOW
     }), _versionAttrs);
 
-    var cloneModelAttrs = cloneAttrs(model);
+    var cloneModelAttrs = cloneAttrs(model, attrsToClone);
 
     var versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
-
-    primaryKeys.forEach(function (pk) {
-        delete versionModelAttrs[pk].autoIncrement;
-        delete versionModelAttrs[pk].primaryKey;
-    });
 
     var tableName = prefix.toLowerCase() + '_' + (model.options.tableName || model.name.toLowerCase()) + (suffix ? '_' + suffix : '');
 
@@ -88,14 +88,14 @@ function Version(model, customOptions) {
 
         model.addHook(hook, function (instanceData) {
 
-            var versionType = VersionType.CREATE;
+            var versionType = VersionType.CREATED;
 
             switch (hook) {
-                case 'afterUpdate':case 'afterSave':
-                    versionType = VersionType.UPDATE;
+                case 'afterUpdate':
+                    versionType = VersionType.UPDATED;
                     break;
                 case 'afterDestroy':
-                    versionType = VersionType.DELETE;
+                    versionType = VersionType.DELETED;
                     break;
             }
 

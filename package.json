@@ -1,6 +1,6 @@
 {
   "name": "sequelize-version",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "description": "Automatically version (audit, log) your sequelize models",
   "main": "index.js",
   "keywords": [
@@ -12,7 +12,7 @@
   "scripts": {
     "test": "mocha",
     "build": "babel src -o index.js",
-    "preversion": "mocha",
+    "preversion": "mocha && npm run build",
     "version": "git add --all",
     "release": "yarn version --new-version patch",
     "postversion": "git push"
