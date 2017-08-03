@@ -14,7 +14,8 @@ yarn add sequelize-version
 ```
 ## Features
 
-* Custom settings (version prefix)
+* Track automatically all the changes of your model (create, update, delete), using hooks
+* Custom settings (version prefix, suffix, schema)
 * Supports transaction (cls required - http://docs.sequelizejs.com/manual/tutorial/transactions.html#automatically-pass-transactions-to-all-queries)
 
 
