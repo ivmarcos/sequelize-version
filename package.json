@@ -1,6 +1,6 @@
 {
   "name": "sequelize-version",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "Automatically version (audit, log) your sequelize models",
   "main": "index.js",
   "keywords": [
