@@ -4,28 +4,30 @@ function capitalize(string){
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-function getPrimaryKeys(model) {
+function cloneAttrs(model, attrs){
 
-    let primaryKeys = [];
+    let clone = {};
 
-    for (var p in model.attributes) {
+    for (var p in model.attributes){
 
-        const attr = model.attributes[p];
+        let nestedClone = {};
+        
+        const attribute = model.attributes[p];
 
-        if (attr.primaryKey) primaryKeys.push(p);
+        for (var np in attribute){
+            if (attrs.indexOf(np) > -1){
+                nestedClone[np] = attribute[np];
+            }
+        }
+
+        clone[p] = nestedClone;
 
     }
 
-    return primaryKeys;
+    return clone;
+
 }
 
-function cloneAttrs(model){
-    return Object.keys(model.attributes).map(attr => {
-        return {
-            [attr]: Object.assign({}, model.attributes[attr])
-        }
-    }).reduce((a, b) => Object.assign(a, b));
-}
 
 const VersionType = {
     CREATED: 1,
@@ -39,6 +41,7 @@ const defaults = {
 }
 
 const hooks = ['afterUpdate', 'afterCreate', 'afterDestroy'];
+const attrsToClone = ['type', 'defaultValue', 'field'];
 
 function Version(model, customOptions) {
 
@@ -49,7 +52,7 @@ function Version(model, customOptions) {
 
     const versionModelName = `${capitalize(prefix)}${capitalize(model.name)}`;
 
-    const primaryKeys = getPrimaryKeys(model);
+    //const primaryKeys = getPrimaryKeys(model);
 
     const versionAttrs = {
         [`${prefix}_id`]: {
@@ -66,14 +69,9 @@ function Version(model, customOptions) {
         },
     }
 
-    const cloneModelAttrs = cloneAttrs(model);
+    const cloneModelAttrs = cloneAttrs(model, attrsToClone);
 
     const versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
-
-    primaryKeys.forEach(pk => {
-        delete versionModelAttrs[pk].autoIncrement;        
-        delete versionModelAttrs[pk].primaryKey;
-    });
 
     const tableName = `${prefix.toLowerCase()}_${model.options.tableName || model.name.toLowerCase()}${suffix ? `_${suffix}`:''}`;
 
