@@ -106,9 +106,8 @@ Version.defaults.schema = schema; //default '' - if empty string, will be used t
 # Transaction (cls required)
 ```js
 const cls = require('continuation-local-storage');
-const env = process.env;
-
 const namespace = cls.createNamespace('my-very-own-namespace');
+
 Sequelize.useCLS(namespace); //Sequelize.cls = namespace - for older versions of sequelize, above 4
 
 //with cls the transaction will be passed automatically in all queries inside sequelize.transaction function, including version hooks
