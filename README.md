@@ -1,7 +1,8 @@
 [![Build Status](https://travis-ci.org/ivmarcos/sequelize-version.svg?branch=master)](https://travis-ci.org/ivmarcos/sequelize-version)
 
 # sequelize-version
-Automatically version your sequelize models
+Automatically version (audit, log) your sequelize models, tracking all the changes (create, update, delete) by generating a version of the model than can be used for easy
+querying, see the changes made, or whatever you want. The version model uses sequelize hooks to persist the data.
 
 ## Installation
 
@@ -33,7 +34,7 @@ const PersonVersion = new Version(Person);
 
 ## Examples
 
-# Simple 
+### Simple 
 ```js
 // let's create a person for test
 let person = await Person.build({name: 'Jack'}).save();
@@ -85,7 +86,7 @@ console.log(JSON.parse(JSON.stringify(versions)));
 ]
 */
 ```
-#Custom options
+### Custom options
 ```js
 const prefix = ''; 
 const suffix = 'log'; 
@@ -103,7 +104,7 @@ Version.defaults.schema = schema; //default '' - if empty string, will be used t
 ```
 
 
-# Transaction (cls required)
+### Transaction (cls required)
 ```js
 const cls = require('continuation-local-storage');
 const namespace = cls.createNamespace('my-very-own-namespace');
@@ -118,7 +119,7 @@ sequelize.transaction(() => {
 });
 ```
 
-# Find by version type (create, save, delete)
+### Find by version type (create, save, delete)
 ```js
 const AuditModel = new Version(TestModel);
 
