@@ -123,8 +123,6 @@ describe('sequelize-version', () => {
 
             try{
 
-                await TestModel.destroy({truncate: true}),
-                await VersionModel.destroy({truncate: true}),
                 await sequelize.transaction(async() => {
 
                     return Promise.all([
