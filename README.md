@@ -126,9 +126,9 @@ const AuditModel = new Version(TestModel);
 
 const {CREATED, DELETED, UPDATED} = Version.VersionType;
 
-const created = await AuditModel.findAll({where: {version_type_id: CREATED}});
-const updated = await AuditModel.findAll({where: {version_type_id: UPDATED}});
-const deleted = await AuditModel.findAll({where: {version_type_id: DELETED}});
+const created = await AuditModel.findAll({where: {version_type: CREATED}});
+const updated = await AuditModel.findAll({where: {version_type: UPDATED}});
+const deleted = await AuditModel.findAll({where: {version_type: DELETED}});
 ```
 
 ## License
