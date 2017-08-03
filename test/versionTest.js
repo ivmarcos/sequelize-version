@@ -23,6 +23,10 @@ const TestModel = sequelize.define('test', {
     },
     name: {
         type: Sequelize.STRING,
+        allowNull: false,
+        defaultValue: 'test defaultValue',
+        unique: true,
+        defaultValue: 'test defaultValue'
     }
 });
 
@@ -101,15 +105,20 @@ describe('sequelize-version', () => {
 
         }
 
-        test().then(versionsInstance => {
+        test().then(result => {
 
-            assert.equal(versionsInstance.length, 3);
-            assert.equal(Version.VersionType.CREATED, versionsInstance[0].version_type);
-            assert.equal(Version.VersionType.UPDATED, versionsInstance[1].version_type);
-            assert.equal(Version.VersionType.DELETED, versionsInstance[2].version_type);
+            if (typeof result === 'error') {
+                done(result);
+            }else{
+                assert.equal(result.length, 3);
+                assert.equal(Version.VersionType.CREATED, result[0].version_type);
+                assert.equal(Version.VersionType.UPDATED, result[1].version_type);
+                assert.equal(Version.VersionType.DELETED, result[2].version_type);
+                done();
+            }
+
             
             
-            done();
             
         }).catch(err => done(err));
 

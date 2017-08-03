@@ -8,11 +8,15 @@ function cloneAttrs(model, attrs){
 
     let clone = {};
 
-    for (var p in model.attributes){
+    const attributes = model.attributes;
+
+    if (typeof attributes === 'string' || typeof attributes === 'function') return attributes;
+
+    for (var p in attributes){
 
         let nestedClone = {};
         
-        const attribute = model.attributes[p];
+        const attribute = attributes[p];
 
         for (var np in attribute){
             if (attrs.indexOf(np) > -1){
@@ -41,7 +45,7 @@ const defaults = {
 }
 
 const hooks = ['afterUpdate', 'afterCreate', 'afterDestroy'];
-const attrsToClone = ['type', 'defaultValue', 'field'];
+const attrsToClone = ['type', 'field'];
 
 function Version(model, customOptions) {
 
