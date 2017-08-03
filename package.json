@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "test": "mocha",
-    "build": "babel lib -o index.js",
+    "build": "babel src -o index.js",
     "preversion": "mocha",
     "version": "git add --all",
     "release": "yarn version --new-version patch",

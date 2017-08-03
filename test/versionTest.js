@@ -1,5 +1,5 @@
 const assert = require('assert');
-const Version = require('../lib');
+const Version = require('../src');
 const Sequelize = require('sequelize');
 const cls = require('continuation-local-storage');
 const env = process.env;
