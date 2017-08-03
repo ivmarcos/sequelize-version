@@ -26,10 +26,11 @@ const Sequelize = require('sequelize');
 const Version = require('sequelize-version');
 
 const sequelize = new Sequelize(...);
-
 const Person = sequelize.define('Person', ...);
-
 const PersonVersion = new Version(Person);
+
+await sequelize.sync();
+
 ```
 
 ## Examples
