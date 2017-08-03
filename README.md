@@ -132,8 +132,6 @@ sequelize.transaction(() => {
 ```js
 const AuditModel = new Version(TestModel);
 
-const testInstance = TestModel.build({name: 'test})
-
 const created = await AuditModel.findAll({where: {version_type: Version.VersionType.CREATED}});
 const updated = await AuditModel.findAll({where: {version_type: Version.VersionType.UPDATED}});
 const deleted = await AuditModel.findAll({where: {version_type: Version.VersionType.DELETED}});
