@@ -10,8 +10,6 @@ function cloneAttrs(model, attrs){
 
     const attributes = model.attributes;
 
-    if (typeof attributes === 'string' || typeof attributes === 'function') return attributes;
-
     for (var p in attributes){
 
         let nestedClone = {};
