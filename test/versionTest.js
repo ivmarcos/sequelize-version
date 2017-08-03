@@ -59,7 +59,8 @@ describe('sequelize-version', () => {
                     id: testInstance.id
                 }});
 
-                assert.equal(versionInstance.id, testInstance.id);
+                Object.keys(TestModel.attributes).forEach(attr => assert.equal(versionInstance[attr], testInstance[attr]))
+
                 assert.equal(1, versionsInstance.length);
 
             }catch(err){
