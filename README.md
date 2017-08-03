@@ -65,7 +65,7 @@ console.log(JSON.parse(JSON.stringify(person)));
 // ok, now we delete
 await person.destroy();
 
-// we can check the modifications!
+// finally we check the modifications
 const versions = await PersonVersion.findAll({where : {id: person.id}});
 
 console.log(JSON.parse(JSON.stringify(versions)));
@@ -105,11 +105,10 @@ const schema = 'audit';
 const VersionModel = new Version(Model, {prefix, suffix, schema});
 
 
-// Global options
+// global options
 Version.defaults.prefix = prefix; //default 'version'
 Version.defaults.suffix = suffix; //default ''
 Version.defaults.schema = schema; //default '' - if empty string, will be used the same schema of the origin model
-
 ```
 
 
