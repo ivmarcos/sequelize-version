@@ -35,7 +35,7 @@ await sequelize.sync();
 
 ## Examples
 
-### Simple 
+### Basic 
 ```js
 // let's create a person for test
 let person = await Person.build({name: 'Jack'}).save();
@@ -63,6 +63,9 @@ console.log(JSON.parse(JSON.stringify(person)));
 }
 */
 
+// ok, now we delete
+await person.destroy();
+
 // finally we check the versions created for the person
 const versions = await PersonVersion.findAll({where : {id: person.id}});
 
@@ -83,7 +86,13 @@ console.log(JSON.parse(JSON.stringify(versions)));
         id: 1,
         name: 'Jack Johnson'
     },
-
+    {
+        version_id: 3,
+        version_type: 3,
+        version_timestamp: 2017-08-02T16:18:09.959Z,
+        id: 1,
+        name: 'Jack Johnson'
+    },
 ]
 */
 ```
@@ -123,6 +132,8 @@ sequelize.transaction(() => {
 ### Find by version type (create, save, delete)
 ```js
 const AuditModel = new Version(TestModel);
+
+const testInstance = TestModel.build({name: 'test})
 
 const created = await AuditModel.findAll({where: {version_type: Version.VersionType.CREATED}});
 const updated = await AuditModel.findAll({where: {version_type: Version.VersionType.UPDATED}});
