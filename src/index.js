@@ -99,8 +99,6 @@ function Version(model, customOptions) {
                 break;
             }
 
-            console.log('HOOK', hook)
-
             const data = JSON.parse(JSON.stringify(instanceData));
 
             const versionData = Object.assign({}, data, {[`${prefix}_type`]: versionType});
