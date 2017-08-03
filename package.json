@@ -1,6 +1,6 @@
 {
   "name": "sequelize-version",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Automatically version (audit, log) your sequelize models",
   "main": "index.js",
   "keywords": [
@@ -36,9 +36,7 @@
     "eslint": "^4.3.0",
     "mocha": "^3.5.0",
     "pg": "6.1.5",
-    "should": "^11.2.1"
-  },
-  "dependencies": {
     "sequelize": "^4.4.2"
-  }
+  },
+  "dependencies": {}
 }

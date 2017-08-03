@@ -32,6 +32,7 @@ const PersonVersion = new Version(Person);
 
 ## Examples
 
+# Simple 
 ```js
 // let's create a person for test
 let person = await Person.build({name: 'Jack'}).save();
@@ -83,7 +84,49 @@ console.log(JSON.parse(JSON.stringify(versions)));
 ]
 */
 ```
+#Custom options
+```js
+const prefix = ''; 
+const suffix = 'log'; 
+const schema = 'audit';
 
+// single options
+const VersionModel = new Version(Model, {prefix, suffix, schema});
+
+// Global options
+Version.defaults.prefix = prefix; //default 'version'
+Version.defaults.suffix = suffix; //default ''
+Version.defaults.schema = 'audit'; //default '' - if empty string, will be used the same schema of the origin model
+
+```
+
+
+# Transaction (cls required)
+```js
+const cls = require('continuation-local-storage');
+const env = process.env;
+
+const namespace = cls.createNamespace('my-very-own-namespace');
+Sequelize.useCLS(namespace); //Sequelize.cls = namespace - for older versions of sequelize, above 4
+
+//with cls the transaction will be passed automatically in all queries inside sequelize.transaction function, including version hooks
+sequelize.transaction(() => {
+
+    return TestModel.build({name: 'Test with transaction'});
+
+});
+```
+
+# Find by version type (create, save, delete)
+```js
+const AuditModel = new Version(TestModel);
+
+const {CREATE, DELETE, UPDATE} = Version.VersionType;
+
+const created = await AuditModel.findAll({where: {version_type_id: CREATE}});
+const updated = await AuditModel.findAll({where: {version_type_id: UPDATE}});
+const deleted = await AuditModel.findAll({where: {version_type_id: DELETE}});
+```
 
 ## License
 
