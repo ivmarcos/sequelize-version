@@ -37,7 +37,8 @@ var VersionType = {
 };
 
 var defaults = {
-    prefix: 'version'
+    prefix: 'version',
+    suffix: ''
 };
 
 var hooks = ['afterCreate', 'afterUpdate', 'afterSave', 'afterDestroy'];
@@ -48,6 +49,7 @@ function Version(model, customOptions) {
     var options = Object.assign({}, Version.defaults, customOptions);
 
     var prefix = options.prefix;
+    var suffix = options.suffix;
 
     var versionModelName = '' + capitalize(prefix) + capitalize(model.name);
 
@@ -73,7 +75,7 @@ function Version(model, customOptions) {
         delete versionModelAttrs[pk].primaryKey;
     });
 
-    var tableName = prefix.toLowerCase() + '_' + (model.options.tableName || model.name.toLowerCase());
+    var tableName = prefix.toLowerCase() + '_' + (model.options.tableName || model.name.toLowerCase()) + (suffix ? '_' + suffix : '');
 
     var versionModelOptions = {
         schema: model.options.schema,
