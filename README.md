@@ -30,7 +30,6 @@ const sequelize = new Sequelize(...);
 const Person = sequelize.define('Person', ...);
 
 const PersonVersion = new Version(Person);
-
 ```
 
 ## Examples
@@ -66,7 +65,7 @@ console.log(JSON.parse(JSON.stringify(person)));
 // ok, now we delete
 await person.destroy();
 
-// finally we check the versions created for the person
+// we can check the modifications!
 const versions = await PersonVersion.findAll({where : {id: person.id}});
 
 console.log(JSON.parse(JSON.stringify(versions)));
