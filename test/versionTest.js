@@ -102,12 +102,11 @@ describe('sequelize-version', () => {
 
         test().then(versionsInstance => {
 
-
             assert.equal(versionsInstance.length, 3);
-            assert.equal(Version.VersionType.CREATED, versionsInstance[0].version_type_id);
-            assert.equal(Version.VersionType.UPDATED, versionsInstance[1].version_type_id);
-            assert.equal(Version.VersionType.DELETED, versionsInstance[2].version_type_id);
-
+            assert.equal(Version.VersionType.CREATED, versionsInstance[0].version_type);
+            assert.equal(Version.VersionType.UPDATED, versionsInstance[1].version_type);
+            assert.equal(Version.VersionType.DELETED, versionsInstance[2].version_type);
+            
             
             done();
             

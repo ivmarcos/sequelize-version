@@ -28,9 +28,9 @@ function cloneAttrs(model){
 }
 
 const VersionType = {
-    CREATE: 1,
-    UPDATE: 2,
-    DELETE: 3
+    CREATED: 1,
+    UPDATED: 2,
+    DELETED: 3
 }
 
 const defaults = {
@@ -88,14 +88,14 @@ function Version(model, customOptions) {
 
         model.addHook(hook, (instanceData) => {
 
-            let versionType = VersionType.CREATE;
+            let versionType = VersionType.CREATED;
         
             switch (hook){
             case 'afterUpdate': 
-                versionType = VersionType.UPDATE;
+                versionType = VersionType.UPDATED;
                 break;
             case 'afterDestroy':
-                versionType = VersionType.DELETE;
+                versionType = VersionType.DELETED;
                 break;
             }
 
