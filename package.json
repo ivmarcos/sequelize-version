@@ -16,8 +16,7 @@
     "preversion": "mocha",
     "version": "git add --all",
     "release": "yarn version --new-version patch",
-    "postversion": "git push",
-    "prepublish": "npm run test && yarn release"
+    "postversion": "git push"
   },
   "repository": {
     "type": "git",
@@ -33,9 +32,11 @@
     "babel-cli": "^6.24.1",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
+    "continuation-local-storage": "^3.2.0",
     "eslint": "^4.3.0",
     "mocha": "^3.5.0",
-    "pg": "6.1.5"
+    "pg": "6.1.5",
+    "should": "^11.2.1"
   },
   "dependencies": {
     "sequelize": "^4.4.2"

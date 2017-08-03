@@ -31,6 +31,7 @@ const PersonVersion = new Version(Person);
 ```
 
 ## Examples
+
 ```js
 // let's create a person for test
 let person = await Person.build({name: 'Jack'}).save();
@@ -73,7 +74,7 @@ console.log(JSON.parse(JSON.stringify(versions)));
     },
     {
         version_id: 2,
-        version_type: 1,
+        version_type: 2,
         version_timestamp: 2017-08-02T16:18:09.958Z,
         id: 1,
         name: 'Jack Johnson'
