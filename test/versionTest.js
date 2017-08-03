@@ -27,7 +27,9 @@ const TestModel = sequelize.define('test', {
         defaultValue: 'test defaultValue',
         unique: true,
         defaultValue: 'test defaultValue'
-    }
+    },
+    simple: Sequelize.STRING,
+    createdAt: Sequelize.DATE,
 });
 
 const VersionModel = new Version(TestModel);
