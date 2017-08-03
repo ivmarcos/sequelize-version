@@ -38,7 +38,7 @@ const defaults = {
     suffix: '',
 }
 
-const hooks = ['afterCreate', 'afterUpdate', 'afterSave', 'afterDestroy'];
+const hooks = ['afterUpdate', 'afterSave', 'afterDestroy'];
 
 function Version(model, customOptions) {
 
@@ -91,13 +91,15 @@ function Version(model, customOptions) {
             let versionType = VersionType.CREATE;
         
             switch (hook){
-            case 'afterUpdate': case 'afterSave':
+            case 'afterUpdate': 
                 versionType = VersionType.UPDATE;
                 break;
             case 'afterDestroy':
                 versionType = VersionType.DELETE;
                 break;
             }
+
+            console.log('HOOK', hook)
 
             const data = JSON.parse(JSON.stringify(instanceData));
 

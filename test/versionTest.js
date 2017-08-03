@@ -8,7 +8,7 @@ const namespace = cls.createNamespace('my-very-own-namespace');
 Sequelize.useCLS(namespace);
 
 const sequelize = new Sequelize(env.DB_TEST, env.DB_USER, env.DB_PWD, {
-    logging: () => {},
+    logging: console.log,
     dialect: 'postgres',
     define: {
         timestamps: false,
@@ -26,7 +26,7 @@ const TestModel = sequelize.define('test', {
     }
 });
 
-const VersionTestModel = new Version(TestModel);
+const VersionModel = new Version(TestModel);
 
 before(done => {
 
@@ -36,6 +36,13 @@ before(done => {
 
 describe('sequelize-version', () => {
 
+    beforeEach(done => {
+        Promise.all([
+            TestModel.destroy({truncate : true}),
+            VersionModel.destroy({truncate: true,})
+        ]).then(() => done()).catch(err => done(err));
+    })
+
     it ('basic usage', done => {
 
         const test = async() => {
@@ -44,11 +51,16 @@ describe('sequelize-version', () => {
 
                 const testInstance = await TestModel.build({name: 'test'}).save();
 
-                const versionInstance = await VersionTestModel.find({where : {
+                const versionInstance = await VersionModel.find({where : {
                     id: testInstance.id
                 }});
 
-                return assert.equal(versionInstance.id, testInstance.id);
+                const versionsInstance = await VersionModel.findAll({where : {
+                    id: testInstance.id
+                }});
+
+                assert.equal(versionInstance.id, testInstance.id);
+                assert.equal(1, versionsInstance.length);
 
             }catch(err){
 
@@ -61,6 +73,8 @@ describe('sequelize-version', () => {
 
     })
 
+    
+
 
     it ('must support transaction with cls', done => {
 
@@ -72,7 +86,7 @@ describe('sequelize-version', () => {
             try{
 
                 await TestModel.destroy({truncate: true}),
-                await VersionTestModel.destroy({truncate: true}),
+                await VersionModel.destroy({truncate: true}),
                 await sequelize.transaction(async() => {
 
                     return Promise.all([
@@ -82,7 +96,7 @@ describe('sequelize-version', () => {
                 }).catch(async err => {
 
                     if (err.message === ERR_MSG){
-                        const versions = await VersionTestModel.findAll();
+                        const versions = await VersionModel.findAll();
                         assert.equal(versions.length, 0);
 
                     }else{
