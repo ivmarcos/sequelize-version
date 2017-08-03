@@ -93,10 +93,11 @@ const schema = 'audit';
 // single options
 const VersionModel = new Version(Model, {prefix, suffix, schema});
 
+
 // Global options
 Version.defaults.prefix = prefix; //default 'version'
 Version.defaults.suffix = suffix; //default ''
-Version.defaults.schema = 'audit'; //default '' - if empty string, will be used the same schema of the origin model
+Version.defaults.schema = audit; //default '' - if empty string, will be used the same schema of the origin model
 
 ```
 
