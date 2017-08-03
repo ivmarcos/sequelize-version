@@ -38,7 +38,7 @@ describe('sequelize-version', () => {
 
     it ('basic usage', done => {
 
-        const teste = async() => {
+        const test = async() => {
 
             try{
 
@@ -57,7 +57,7 @@ describe('sequelize-version', () => {
 
         }
 
-        teste().then(result => done(result)).catch(err => done(err));
+        test().then(result => done(result)).catch(err => done(err));
 
     })
 
@@ -66,7 +66,7 @@ describe('sequelize-version', () => {
 
         const ERR_MSG = 'ROLLBACK_CLS_TEST';
 
-        const teste = async() => {
+        const test = async() => {
 
 
             try{
@@ -74,8 +74,6 @@ describe('sequelize-version', () => {
                 await TestModel.destroy({truncate: true}),
                 await VersionTestModel.destroy({truncate: true}),
                 await sequelize.transaction(async() => {
-
-                    console.log('executando')
 
                     return Promise.all([
                          TestModel.build({name: 'test transaction cls'}).save().then(() => Promise.reject(new Error(ERR_MSG))),
@@ -104,11 +102,11 @@ describe('sequelize-version', () => {
         }
 
 
-        teste().then(result => done(result)).catch(err => done(err));
+        test().then(result => done(result)).catch(err => done(err));
 
     });
 
-    it ('Must deal with custom options', () => {
+    it ('Must support custom options', () => {
 
         const schema = 'test2';
         const prefix = 'version';
@@ -121,5 +119,7 @@ describe('sequelize-version', () => {
         assert.equal(true, new RegExp(`${suffix}$`).test(V2.options.tableName));
 
     })
+
+   
 
 });
