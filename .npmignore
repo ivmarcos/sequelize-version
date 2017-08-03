@@ -6,3 +6,4 @@ test
 .eslintrc.json
 .babelrc
 .gitignore
+npm-debug.log
