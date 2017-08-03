@@ -124,11 +124,11 @@ sequelize.transaction(() => {
 ```js
 const AuditModel = new Version(TestModel);
 
-const {CREATE, DELETE, UPDATE} = Version.VersionType;
+const {CREATED, DELETED, UPDATED} = Version.VersionType;
 
-const created = await AuditModel.findAll({where: {version_type_id: CREATE}});
-const updated = await AuditModel.findAll({where: {version_type_id: UPDATE}});
-const deleted = await AuditModel.findAll({where: {version_type_id: DELETE}});
+const created = await AuditModel.findAll({where: {version_type_id: CREATED}});
+const updated = await AuditModel.findAll({where: {version_type_id: UPDATED}});
+const deleted = await AuditModel.findAll({where: {version_type_id: DELETED}});
 ```
 
 ## License

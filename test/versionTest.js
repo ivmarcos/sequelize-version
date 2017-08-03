@@ -90,7 +90,7 @@ describe('sequelize-version', () => {
                     id: testInstance.id
                 }});
 
-                return versionsInstance
+                return versionsInstance;
                
 
             }catch(err){
