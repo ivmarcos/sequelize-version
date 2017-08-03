@@ -38,7 +38,7 @@ const defaults = {
     suffix: '',
 }
 
-const hooks = ['afterUpdate', 'afterSave', 'afterDestroy'];
+const hooks = ['afterUpdate', 'afterCreate', 'afterDestroy'];
 
 function Version(model, customOptions) {
 

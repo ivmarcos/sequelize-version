@@ -73,8 +73,47 @@ describe('sequelize-version', () => {
 
     })
 
-    
 
+    it ('all hooks working', done => {
+
+        const test = async() => {
+
+            try{
+
+                let testInstance = await TestModel.build({name: 'test'}).save();
+                testInstance.name = 'test changed';
+
+                await testInstance.save();
+                await testInstance.destroy();
+
+                const versionsInstance = await VersionModel.findAll({where : {
+                    id: testInstance.id
+                }});
+
+                return versionsInstance
+               
+
+            }catch(err){
+
+                return err;
+            }
+
+        }
+
+        test().then(versionsInstance => {
+
+
+            assert.equal(versionsInstance.length, 3);
+            assert.equal(Version.VersionType.CREATED, versionsInstance[0].version_type_id);
+            assert.equal(Version.VersionType.UPDATED, versionsInstance[1].version_type_id);
+            assert.equal(Version.VersionType.DELETED, versionsInstance[2].version_type_id);
+
+            
+            done();
+            
+        }).catch(err => done(err));
+
+    })
 
     it ('must support transaction with cls', done => {
 
