@@ -8,7 +8,7 @@ const namespace = cls.createNamespace('my-very-own-namespace');
 Sequelize.useCLS(namespace);
 
 const sequelize = new Sequelize(env.DB_TEST, env.DB_USER, env.DB_PWD, {
-    logging: console.log,
+    logging: () => {},
     dialect: 'postgres',
     define: {
         timestamps: false,
@@ -30,7 +30,7 @@ const VersionTestModel = new Version(TestModel);
 
 before(done => {
 
-    sequelize.sync({force: true, logging: console.log}).then(() => done()).catch(err => done(err));
+    sequelize.sync({force: true}).then(() => done()).catch(err => done(err));
 
 });
 

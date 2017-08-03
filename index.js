@@ -78,7 +78,7 @@ function Version(model, customOptions) {
     var tableName = prefix.toLowerCase() + '_' + (model.options.tableName || model.name.toLowerCase()) + (suffix ? '_' + suffix : '');
 
     var versionModelOptions = {
-        schema: model.options.schema,
+        schema: options.schema || model.options.schema,
         tableName: tableName
     };
 
