@@ -1,11 +1,22 @@
 const assert = require('assert');
-const Version = require('../src');
+const Version = require('../index');
 const Sequelize = require('sequelize');
 const cls = require('continuation-local-storage');
 const env = process.env;
 
 const namespace = cls.createNamespace('my-very-own-namespace');
 Sequelize.useCLS(namespace);
+
+function getRawData(instance){
+    return JSON.parse(JSON.stringify(instance));
+}
+
+function getVersionFields(prefix){
+    const versionFieldId = `${prefix}_id`;
+    const versionFieldType = `${prefix}_type`;
+    const versionFieldTimestamp = `${prefix}_timestamp`;
+    return [versionFieldId, versionFieldType, versionFieldTimestamp];
+}
 
 const sequelize = new Sequelize(env.DB_TEST, env.DB_USER, env.DB_PWD, {
     logging: console.log,
@@ -30,6 +41,8 @@ const TestModel = sequelize.define('test', {
 
 const VersionModel = new Version(TestModel);
 
+const versionFields = getVersionFields(Version.defaults.prefix);
+
 before(done => {
 
     sequelize.sync({force: true}).then(() => done()).catch(err => done(err));
@@ -40,8 +53,8 @@ describe('sequelize-version', () => {
 
     beforeEach(done => {
         Promise.all([
-            TestModel.destroy({truncate : true}),
-            VersionModel.destroy({truncate: true,})
+            TestModel.destroy({truncate : true, restartIdentity: true}),
+            VersionModel.destroy({truncate: true, restartIdentity: true})
         ]).then(() => done()).catch(err => done(err));
     })
 
@@ -61,11 +74,20 @@ describe('sequelize-version', () => {
                     id: testInstance.id
                 }});
 
-                Object.keys(TestModel.attributes).forEach(attr => {
+                const attributes = Object.keys(TestModel.attributes);
+                const versionAttributes = Object.keys(VersionModel.attributes);
+                
+                attributes.forEach(attr => {
                     assert.deepEqual(versionInstance[attr], testInstance[attr])
                 })
 
                 assert.equal(1, versionsInstance.length);
+                assert.equal(attributes.length + 3, versionAttributes.length);
+
+                const versionAttrsCreated = versionAttributes.filter(attr => versionFields.includes(attr));
+
+                assert.equal(versionAttrsCreated.length, versionFields.length)
+
 
             }catch(err){
 
@@ -166,10 +188,10 @@ describe('sequelize-version', () => {
 
     });
 
-    it ('Must support custom options', () => {
+    it ('must support custom options', done => {
 
         const schema = 'test2';
-        const prefix = 'version';
+        const prefix = 'audit';
         const suffix = 'log';
 
         const V2 = new Version(TestModel, {schema, prefix, suffix});
@@ -177,6 +199,109 @@ describe('sequelize-version', () => {
         assert.equal(V2.options.schema, schema)
         assert.equal(true, new RegExp(`^${prefix}`).test(V2.options.tableName));
         assert.equal(true, new RegExp(`${suffix}$`).test(V2.options.tableName));
+
+        const test = async() => {
+
+            try{
+                
+                await sequelize.query(`CREATE SCHEMA IF NOT EXISTS ${schema}`);
+
+                await V2.sync({force: true});
+
+                const testInstance = await TestModel.build({name: 'test'}).save();
+
+                return Promise.all([
+                    VersionModel.findAll({where: {id: testInstance.id}}),
+                    V2.findAll({where: {id: testInstance.id}}),
+                    Promise.resolve(testInstance)
+                ]);    
+                    
+            }catch(err){
+
+                return err;
+            }
+
+        }
+
+        test().then(result => {
+
+            if (typeof result === 'error') return done(result);
+
+            const vs1 = result[0];
+            const vs2 = result[1];
+            const testInstance = result[2];
+
+            const attributes = Object.keys(TestModel.attributes);
+            
+            attributes.forEach(attr => {
+                assert.deepEqual(vs1[0][attr], testInstance[attr])
+                assert.deepEqual(vs2[0][attr], testInstance[attr])
+            });
+            
+            done();
+
+        }).catch(err => done(err));
+
+    });
+
+
+    it ('must support global options', done => {
+
+        const schema = 'test3';
+        const prefix = 'version';
+        const suffix = 'log';
+
+        Version.defaults.schema = schema;
+        Version.defaults.prefix = prefix;
+        Version.defaults.suffix = suffix;
+
+        const V3 = new Version(TestModel);
+
+        assert.equal(V3.options.schema, schema)
+        assert.equal(true, new RegExp(`^${prefix}`).test(V3.options.tableName));
+        assert.equal(true, new RegExp(`${suffix}$`).test(V3.options.tableName));
+
+        const test = async() => {
+
+            try{
+                
+                await sequelize.query(`CREATE SCHEMA IF NOT EXISTS ${schema}`);
+
+                await V3.sync({force: true});
+
+                const testInstance = await TestModel.build({name: 'test'}).save();
+
+                return Promise.all([
+                    VersionModel.findAll({where: {id: testInstance.id}}),
+                    V3.findAll({where: {id: testInstance.id}}),
+                    Promise.resolve(testInstance)
+                ]);    
+                    
+            }catch(err){
+
+                return err;
+            }
+
+        }
+
+        test().then(result => {
+
+            if (typeof result === 'error') return done(result);
+
+            const vs1 = result[0];
+            const vs2 = result[1];
+            const testInstance = result[2];
+
+            const attributes = Object.keys(TestModel.attributes);
+            
+            attributes.forEach(attr => {
+                assert.deepEqual(vs1[0][attr], testInstance[attr])
+                assert.deepEqual(vs2[0][attr], testInstance[attr])
+            });
+            
+            done();
+
+        }).catch(err => done(err));
 
     })
 

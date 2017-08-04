@@ -54,7 +54,7 @@ function getVersionType(hook){
 
 function Version(model, customOptions) {
 
-    const options = Object.assign({}, Version.defaults, customOptions);
+    const options = Object.assign({}, defaults, Version.defaults, customOptions);
    
     const prefix = options.prefix;
     const suffix = options.suffix;
