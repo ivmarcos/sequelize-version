@@ -122,7 +122,7 @@ Sequelize.useCLS(namespace); //Sequelize.cls = namespace - for older versions of
 //with cls the transaction will be passed automatically in all queries inside sequelize.transaction function, including version hooks
 sequelize.transaction(() => {
 
-    return TestModel.build({name: 'Test with transaction'});
+    return TestModel.build({name: 'Test with transaction'}).save();
 
 });
 ```
