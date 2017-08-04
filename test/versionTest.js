@@ -271,12 +271,16 @@ describe('sequelize-version', () => {
 
                 const testInstance = await TestModel.build({name: 'test'}).save();
 
-                return Promise.all([
+                const result = await Promise.all([
                     VersionModel.findAll({where: {id: testInstance.id}}),
                     V3.findAll({where: {id: testInstance.id}}),
                     Promise.resolve(testInstance)
                 ]);    
-                    
+
+                console.log('RESULT', result);
+
+                return result;
+                                    
             }catch(err){
 
                 return err;
@@ -287,6 +291,8 @@ describe('sequelize-version', () => {
         test().then(result => {
 
             if (typeof result === 'error') return done(result);
+
+                console.log('RESULT', result);
 
             const vs1 = result[0];
             const vs2 = result[1];
