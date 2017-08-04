@@ -4,19 +4,20 @@ function capitalize(string){
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+
 function cloneAttrs(model, attrs){
 
     let clone = {};
 
     const attributes = model.attributes;
 
-    for (var p in attributes){
+    for (let p in attributes){
 
         let nestedClone = {};
         
         const attribute = attributes[p];
 
-        for (var np in attribute){
+        for (let np in attribute){
             if (attrs.indexOf(np) > -1){
                 nestedClone[np] = attribute[np];
             }
@@ -42,44 +43,52 @@ const defaults = {
     suffix: '',
 }
 
-const hooks = ['afterUpdate', 'afterCreate', 'afterDestroy'];
+const hooks = ['afterCreate', 'afterUpdate', 'afterDestroy'];
 const attrsToClone = ['type', 'field'];
+
+function getVersionType(hook){
+    if (hook === 'afterCreate') return VersionType.CREATED;
+    if (hook === 'afterUpdate') return VersionType.UPDATED;
+    if (hook === 'afterDestroy') return VersionType.DELETED;
+}
 
 function Version(model, customOptions) {
 
     const options = Object.assign({}, Version.defaults, customOptions);
-
+   
     const prefix = options.prefix;
     const suffix = options.suffix;
-
+    
     const versionModelName = `${capitalize(prefix)}${capitalize(model.name)}`;
-
-    //const primaryKeys = getPrimaryKeys(model);
+    
+    const versionFieldId = `${prefix}_id`;
+    const versionFieldType = `${prefix}_type`;
+    const versionFieldTimestamp = `${prefix}_timestamp`
 
     const versionAttrs = {
-        [`${prefix}_id`]: {
+        [versionFieldId]: {
             type: Sequelize.BIGINT,
             primaryKey: true,
             autoIncrement: true,
         },
-        [`${prefix}_type`]: {
+        [versionFieldType]: {
             type: Sequelize.INTEGER,
+            allowNull: false,
         },
-        [`${prefix}_timestamp`]: {
+        [versionFieldTimestamp]: {
             type: Sequelize.DATE,
-            defaultValue: Sequelize.NOW
+            allowNull: false,
         },
     }
 
     const cloneModelAttrs = cloneAttrs(model, attrsToClone);
-
     const versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
-
     const tableName = `${prefix.toLowerCase()}_${model.options.tableName || model.name.toLowerCase()}${suffix ? `_${suffix}`:''}`;
 
     const versionModelOptions = {
         schema: options.schema || model.options.schema,
         tableName,
+        timestamps: false,
     }
 
     const versionModel = model.sequelize.define(versionModelName, versionModelAttrs, versionModelOptions)
@@ -88,20 +97,11 @@ function Version(model, customOptions) {
 
         model.addHook(hook, (instanceData) => {
 
-            let versionType = VersionType.CREATED;
-        
-            switch (hook){
-            case 'afterUpdate': 
-                versionType = VersionType.UPDATED;
-                break;
-            case 'afterDestroy':
-                versionType = VersionType.DELETED;
-                break;
-            }
+            let versionType = getVersionType(hook);
 
             const data = JSON.parse(JSON.stringify(instanceData));
 
-            const versionData = Object.assign({}, data, {[`${prefix}_type`]: versionType});
+            const versionData = Object.assign({}, data, {[versionFieldType]: versionType, [versionFieldTimestamp]: new Date()});
 
             return versionModel.build(versionData).save();
 

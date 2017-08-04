@@ -10,9 +10,6 @@ Sequelize.useCLS(namespace);
 const sequelize = new Sequelize(env.DB_TEST, env.DB_USER, env.DB_PWD, {
     logging: console.log,
     dialect: 'postgres',
-    define: {
-        timestamps: false,
-    }
 });    
 
 const TestModel = sequelize.define('test', {
@@ -64,7 +61,9 @@ describe('sequelize-version', () => {
                     id: testInstance.id
                 }});
 
-                Object.keys(TestModel.attributes).forEach(attr => assert.equal(versionInstance[attr], testInstance[attr]))
+                Object.keys(TestModel.attributes).forEach(attr => {
+                    assert.deepEqual(versionInstance[attr], testInstance[attr])
+                })
 
                 assert.equal(1, versionsInstance.length);
 
