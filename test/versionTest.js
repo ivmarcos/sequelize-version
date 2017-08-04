@@ -277,8 +277,6 @@ describe('sequelize-version', () => {
                     Promise.resolve(testInstance)
                 ]);    
 
-                console.log('RESULT', result);
-
                 return result;
                                     
             }catch(err){
@@ -291,8 +289,6 @@ describe('sequelize-version', () => {
         test().then(result => {
 
             if (typeof result === 'error') return done(result);
-
-                console.log('RESULT', result);
 
             const vs1 = result[0];
             const vs2 = result[1];

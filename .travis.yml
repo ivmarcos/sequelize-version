@@ -10,3 +10,5 @@ before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
 env:
   - DB_TEST=travis_ci_test
+addons:
+  postgresql: "9.4"
