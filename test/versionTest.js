@@ -153,7 +153,7 @@ describe('sequelize-version', () => {
 
                 await sequelize.transaction(transaction => {
 
-                    return TestModel.build({name: 'test transaction'}).save().then(() => Promise.reject(new Error(ERR_MSG)));
+                    return TestModel.build({name: 'test transaction'}).save({transaction}).then(() => Promise.reject(new Error(ERR_MSG)));
 
                 }).catch(async err => {
 
