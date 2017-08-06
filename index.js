@@ -92,8 +92,11 @@ function Version(model, customOptions) {
 
     hooks.forEach(function (hook) {
 
-        model.addHook(hook, function (instanceData) {
+        model.addHook(hook, function (instanceData, _ref) {
             var _Object$assign;
+
+            var transaction = _ref.transaction;
+
 
             var versionType = getVersionType(hook);
 
@@ -101,7 +104,7 @@ function Version(model, customOptions) {
 
             var versionData = Object.assign({}, data, (_Object$assign = {}, _defineProperty(_Object$assign, versionFieldType, versionType), _defineProperty(_Object$assign, versionFieldTimestamp, new Date()), _Object$assign));
 
-            return versionModel.build(versionData).save();
+            return versionModel.build(versionData).save({ transaction: transaction });
         });
     });
 

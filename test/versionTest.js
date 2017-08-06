@@ -1,11 +1,11 @@
 const assert = require('assert');
 const Version = require('../index');
 const Sequelize = require('sequelize');
-const cls = require('continuation-local-storage');
+//const cls = require('continuation-local-storage');
 const env = process.env;
 
-const namespace = cls.createNamespace('my-very-own-namespace');
-Sequelize.useCLS(namespace);
+//const namespace = cls.createNamespace('my-very-own-namespace');
+//Sequelize.useCLS(namespace);
 
 function getRawData(instance){
     return JSON.parse(JSON.stringify(instance));

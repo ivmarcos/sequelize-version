@@ -95,15 +95,15 @@ function Version(model, customOptions) {
 
     hooks.forEach(hook => {
 
-        model.addHook(hook, (instanceData) => {
+        model.addHook(hook, (instanceData, {transaction}) => {
 
             let versionType = getVersionType(hook);
 
             const data = JSON.parse(JSON.stringify(instanceData));
 
             const versionData = Object.assign({}, data, {[versionFieldType]: versionType, [versionFieldTimestamp]: new Date()});
-
-            return versionModel.build(versionData).save();
+            
+            return versionModel.build(versionData).save({transaction});
 
         })
 

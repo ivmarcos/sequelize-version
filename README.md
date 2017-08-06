@@ -17,7 +17,7 @@ yarn add sequelize-version
 
 * Track automatically all the changes of your model (create, update, delete), using hooks
 * Custom settings (version prefix, suffix, schema)
-* Supports transaction (cls required - http://docs.sequelizejs.com/manual/tutorial/transactions.html#automatically-pass-transactions-to-all-queries)
+* Supports transaction 
 
 
 ## Basic Usage
@@ -95,6 +95,7 @@ console.log(JSON.parse(JSON.stringify(versions)));
 ]
 */
 ```
+
 ### Custom options
 ```js
 const prefix = ''; 
@@ -109,22 +110,6 @@ const VersionModel = new Version(Model, {prefix, suffix, schema});
 Version.defaults.prefix = prefix; //default 'version'
 Version.defaults.suffix = suffix; //default ''
 Version.defaults.schema = schema; //default '' - if empty string, will be used the same schema of the origin model
-```
-
-
-### Transaction (cls required)
-```js
-const cls = require('continuation-local-storage');
-const namespace = cls.createNamespace('my-very-own-namespace');
-
-Sequelize.useCLS(namespace); //Sequelize.cls = namespace - for older versions of sequelize, above 4
-
-//with cls the transaction will be passed automatically in all queries inside sequelize.transaction function, including version hooks
-sequelize.transaction(() => {
-
-    return TestModel.build({name: 'Test with transaction'}).save();
-
-});
 ```
 
 ### Find by version type (create, save, delete)
