@@ -1,11 +1,7 @@
 const assert = require('assert');
 const Version = require('../index');
 const Sequelize = require('sequelize');
-//const cls = require('continuation-local-storage');
 const env = process.env;
-
-//const namespace = cls.createNamespace('my-very-own-namespace');
-//Sequelize.useCLS(namespace);
 
 function getRawData(instance){
     return JSON.parse(JSON.stringify(instance));
@@ -146,20 +142,18 @@ describe('sequelize-version', () => {
 
     })
 
-    it ('must support transaction with cls', done => {
+    it ('must support transaction', done => {
 
-        const ERR_MSG = 'ROLLBACK_CLS_TEST';
+        const ERR_MSG = 'ROLLBACK_TEST';
 
         const test = async() => {
 
 
             try{
 
-                await sequelize.transaction(async() => {
+                await sequelize.transaction(transaction => {
 
-                    return Promise.all([
-                         TestModel.build({name: 'test transaction cls'}).save().then(() => Promise.reject(new Error(ERR_MSG))),
-                    ]);
+                    return TestModel.build({name: 'test transaction'}).save().then(() => Promise.reject(new Error(ERR_MSG)));
 
                 }).catch(async err => {
 

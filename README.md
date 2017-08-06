@@ -95,7 +95,6 @@ console.log(JSON.parse(JSON.stringify(versions)));
 ]
 */
 ```
-
 ### Custom options
 ```js
 const prefix = ''; 
@@ -110,6 +109,18 @@ const VersionModel = new Version(Model, {prefix, suffix, schema});
 Version.defaults.prefix = prefix; //default 'version'
 Version.defaults.suffix = suffix; //default ''
 Version.defaults.schema = schema; //default '' - if empty string, will be used the same schema of the origin model
+```
+
+
+### Transaction
+```js
+
+//the version model will use the same transaction 
+sequelize.transaction(transaction => {
+
+    return TestModel.build({name: 'Test with transaction'}).save({transaction});
+
+});
 ```
 
 ### Find by version type (create, save, delete)
