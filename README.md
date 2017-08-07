@@ -153,8 +153,6 @@ sequelize.transaction(() => {
 
 ### Find by version type (create, save, delete)
 ```js
-const VersionModel = new Version(Person);
-
 // default scopes created in version model (created, updated, deleted)
 
 const versionCreated = await VersionModel.scope('created').find({where: {id: person.id}});
