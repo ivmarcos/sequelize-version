@@ -62,10 +62,10 @@ console.log(JSON.parse(JSON.stringify(person)));
 }
 */
 
-// ok, now we delete
+// now we delete
 await person.destroy();
 
-// finally we check the modifications
+// finally, we check the modifications
 const versions = await PersonVersion.findAll({where : {id: person.id}});
 
 console.log(JSON.parse(JSON.stringify(versions)));
@@ -115,7 +115,7 @@ Version.defaults.schema = schema; //default '' - if empty string, will be used t
 ### Transaction
 ```js
 
-//the version model will use the same transaction 
+//version uses the model transaction
 sequelize.transaction(transaction => {
 
     return TestModel.build({name: 'Test with transaction'}).save({transaction});
