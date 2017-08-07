@@ -15,7 +15,6 @@ yarn add sequelize-version
 ```
 ## Features
 
-* Track automatically all the changes of your model (create, update, delete), using hooks
 * Custom settings (version prefix, suffix, schema and more)
 * Supports transaction 
 
