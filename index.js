@@ -8,13 +8,15 @@ function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-function cloneAttrs(model, attrs) {
+function cloneAttrs(model, attrs, excludeAttrs) {
 
     var clone = {};
 
     var attributes = model.attributes;
 
     for (var p in attributes) {
+
+        if (excludeAttrs.includes(p)) continue;
 
         var nestedClone = {};
 
@@ -40,7 +42,10 @@ var VersionType = {
 
 var defaults = {
     prefix: 'version',
-    suffix: ''
+    suffix: '',
+    namespace: null,
+    sequelize: null,
+    exclude: []
 };
 
 var hooks = ['afterCreate', 'afterUpdate', 'afterDestroy'];
@@ -59,6 +64,9 @@ function Version(model, customOptions) {
 
     var prefix = options.prefix;
     var suffix = options.suffix;
+    var sequelize = options.sequelize || sequelize;
+    var namespace = options.namespace;
+    var excludeAttrs = options.exclude;
 
     var versionModelName = '' + capitalize(prefix) + capitalize(model.name);
 
@@ -78,7 +86,7 @@ function Version(model, customOptions) {
         allowNull: false
     }), _versionAttrs);
 
-    var cloneModelAttrs = cloneAttrs(model, attrsToClone);
+    var cloneModelAttrs = cloneAttrs(model, attrsToClone, excludeAttrs);
     var versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
     var tableName = prefix.toLowerCase() + '_' + (model.options.tableName || model.name.toLowerCase()) + (suffix ? '_' + suffix : '');
 
@@ -104,9 +112,15 @@ function Version(model, customOptions) {
 
             var versionData = Object.assign({}, data, (_Object$assign = {}, _defineProperty(_Object$assign, versionFieldType, versionType), _defineProperty(_Object$assign, versionFieldTimestamp, new Date()), _Object$assign));
 
-            return versionModel.build(versionData).save({ transaction: transaction });
+            var versionTransaction = namespace ? namespace.get('transaction') : transaction;
+
+            return versionModel.build(versionData).save({ transaction: versionTransaction });
         });
     });
+
+    versionModel.addScope('created', { where: _defineProperty({}, versionFieldType, VersionType.CREATED) });
+    versionModel.addScope('updated', { where: _defineProperty({}, versionFieldType, VersionType.UPDATED) });
+    versionModel.addScope('deleted', { where: _defineProperty({}, versionFieldType, VersionType.DELETED) });
 
     return versionModel;
 }
