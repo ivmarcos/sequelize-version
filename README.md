@@ -165,6 +165,8 @@ sequelize.transaction(() => {
 
 const AuditModel = new Version(Person);
 
+// default scopes created in version model (created, updated, deleted)
+
 const personWhenCreated = await AuditModel.scope('created').find({where: {id: persion.id}});
 
 const allVersionsUpdated = await AuditModel.scope('updated').findAll();;
