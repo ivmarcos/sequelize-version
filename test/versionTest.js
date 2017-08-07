@@ -4,7 +4,7 @@ const Sequelize = require('sequelize');
 const env = process.env;
 
 
-function getRawData(instance){
+function clone(instance){
     return JSON.parse(JSON.stringify(instance));
 }
 
@@ -201,6 +201,7 @@ describe('sequelize-version', () => {
                 }).catch(async err => {
 
                     if (err.message === ERR_MSG){
+                        
                         const versions = await VersionModel.findAll();
                         assert.equal(versions.length, 0);
 
@@ -223,24 +224,39 @@ describe('sequelize-version', () => {
 
         test().then(result => done(result)).catch(err => done(err));
     })
+    
 
     it ('must support custom options', done => {
 
-        const schema = 'test2';
-        const prefix = 'audit';
-        const suffix = 'log';
+        const sequelize2 = new Sequelize(env.DB_TEST, env.DB_USER, env.DB_PWD, {
+            logging: console.log,
+            dialect: 'postgres',
+        });   
 
-        const V2 = new Version(TestModel, {schema, prefix, suffix});
+        const customOptions = {
+            schema: 'test2',
+            prefix: 'audit',
+            suffix: 'log',
+            exclude: ['createdAt', 'updatedAt'],
+            attributePrefix: 'revision',
+            sequelize: sequelize2
+        };
 
-        assert.equal(V2.options.schema, schema)
-        assert.equal(true, new RegExp(`^${prefix}`).test(V2.options.tableName));
-        assert.equal(true, new RegExp(`${suffix}$`).test(V2.options.tableName));
+        const V2 = new Version(TestModel, customOptions);
+
+        assert.equal(V2.options.schema, customOptions.schema)
+        assert.equal(true, new RegExp(`^${customOptions.prefix}`).test(V2.options.tableName));
+        assert.equal(true, new RegExp(`${customOptions.suffix}$`).test(V2.options.tableName));
+
+        const versionAttributes = Object.keys(V2.attributes).filter(attr => attr.match(new RegExp(`^${customOptions.attributePrefix}`)));
+
+        assert.equal(3, versionAttributes.length);
 
         const test = async() => {
 
             try{
                 
-                await sequelize.query(`CREATE SCHEMA IF NOT EXISTS ${schema}`);
+                await sequelize.query(`CREATE SCHEMA IF NOT EXISTS ${customOptions.schema}`);
 
                 await V2.sync({force: true});
 
@@ -268,8 +284,14 @@ describe('sequelize-version', () => {
             const testInstance = result[2];
 
             const attributes = Object.keys(TestModel.attributes);
+            const attributesVersion = Object.keys(V2.attributes);
+
+            const attributesCloned = attributes.filter(attr => customOptions.exclude.indexOf(attr) === -1);
+
+            assert.equal(attributesCloned.length, attributes.length - customOptions.exclude.length);
+            assert.equal(attributesVersion.length, attributes.length - customOptions.exclude.length + 3)
             
-            attributes.forEach(attr => {
+            attributesCloned.forEach(attr => {
                 assert.deepEqual(vs1[0][attr], testInstance[attr])
                 assert.deepEqual(vs2[0][attr], testInstance[attr])
             });
@@ -280,41 +302,46 @@ describe('sequelize-version', () => {
 
     });
 
-
     it ('must support global options', done => {
 
-        const schema = 'test3';
-        const prefix = 'version';
-        const suffix = 'log';
+        const sequelize2 = new Sequelize(env.DB_TEST, env.DB_USER, env.DB_PWD, {
+            logging: console.log,
+            dialect: 'postgres',
+        });   
 
-        Version.defaults.schema = schema;
-        Version.defaults.prefix = prefix;
-        Version.defaults.suffix = suffix;
+        const customOptions = {
+            schema: 'test2',
+            prefix: 'audit',
+            suffix: 'log',
+            exclude: ['createdAt', 'updatedAt'],
+            attributePrefix: 'revision',
+            sequelize: sequelize2
+        };
 
-        const V3 = new Version(TestModel);
+        Version.defaults = customOptions;
 
-        assert.equal(V3.options.schema, schema)
-        assert.equal(true, new RegExp(`^${prefix}`).test(V3.options.tableName));
-        assert.equal(true, new RegExp(`${suffix}$`).test(V3.options.tableName));
+        const V2 = new Version(TestModel);
+
+        assert.equal(V2.options.schema, customOptions.schema)
+        assert.equal(true, new RegExp(`^${customOptions.prefix}`).test(V2.options.tableName));
+        assert.equal(true, new RegExp(`${customOptions.suffix}$`).test(V2.options.tableName));
 
         const test = async() => {
 
             try{
                 
-                await sequelize.query(`CREATE SCHEMA IF NOT EXISTS ${schema}`);
+                await sequelize.query(`CREATE SCHEMA IF NOT EXISTS ${customOptions.schema}`);
 
-                await V3.sync({force: true});
+                await V2.sync({force: true});
 
                 const testInstance = await TestModel.build({name: 'test'}).save();
 
-                const result = await Promise.all([
+                return Promise.all([
                     VersionModel.findAll({where: {id: testInstance.id}}),
-                    V3.findAll({where: {id: testInstance.id}}),
+                    V2.findAll({where: {id: testInstance.id}}),
                     Promise.resolve(testInstance)
                 ]);    
-
-                return result;
-                                    
+                    
             }catch(err){
 
                 return err;
@@ -331,12 +358,76 @@ describe('sequelize-version', () => {
             const testInstance = result[2];
 
             const attributes = Object.keys(TestModel.attributes);
+            const attributesVersion = Object.keys(V2.attributes);
+
+            const attributesCloned = attributes.filter(attr => customOptions.exclude.indexOf(attr) === -1);
+
+            assert.equal(attributesCloned.length, attributes.length - customOptions.exclude.length);
+            assert.equal(attributesVersion.length, attributes.length - customOptions.exclude.length + 3)
+
+            const versionAttributes = Object.keys(V2.attributes).filter(attr => attr.match(new RegExp(`^${customOptions.attributePrefix}`)));
+
+            assert.equal(3, versionAttributes.length);
             
-            attributes.forEach(attr => {
+            attributesCloned.forEach(attr => {
                 assert.deepEqual(vs1[0][attr], testInstance[attr])
                 assert.deepEqual(vs2[0][attr], testInstance[attr])
             });
             
+            done();
+
+        }).catch(err => done(err));
+
+    });
+
+    it ('version scopes must be working', done => {
+
+         const test = async() => {
+
+            try{
+                
+                const testInstance = await TestModel.build({name: 'test'}).save();
+                
+                testInstance.name = 'test 2';
+                
+                await testInstance.save();
+
+                await testInstance.destroy();
+
+                const result = await Promise.all([
+                  VersionModel.scope('created').all(),
+                  VersionModel.scope('updated').all(),
+                  VersionModel.scope('deleted').all(),
+                  VersionModel.scope('created').find({where : {id: testInstance.id}})
+                ]);    
+
+                return result;
+                                    
+            }catch(err){
+
+                return err;
+            }
+
+        }
+
+         test().then(result => {
+
+            if (typeof result === 'error') return done(result);
+
+            const created = result[0];
+            const updated = result[1];
+            const deleted = result[2];
+            const createdSingle = result[3];
+
+            assert.equal(1, created.length);
+            assert.equal(1, created[0].version_type)
+            assert.equal(1, updated.length)
+            assert.equal(2, updated[0].version_type);
+            assert.equal(1, deleted.length);
+            assert.equal(3, deleted[0].version_type);
+
+            assert.deepEqual(clone(created[0]), clone(createdSingle));
+
             done();
 
         }).catch(err => done(err));

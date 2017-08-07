@@ -16,7 +16,7 @@ function cloneAttrs(model, attrs, excludeAttrs) {
 
     for (var p in attributes) {
 
-        if (excludeAttrs.includes(p)) continue;
+        if (excludeAttrs.indexOf(p) > -1) continue;
 
         var nestedClone = {};
 
@@ -42,7 +42,9 @@ var VersionType = {
 
 var defaults = {
     prefix: 'version',
+    attributePrefix: 'version',
     suffix: '',
+    schema: '',
     namespace: null,
     sequelize: null,
     exclude: []
@@ -64,15 +66,17 @@ function Version(model, customOptions) {
 
     var prefix = options.prefix;
     var suffix = options.suffix;
-    var sequelize = options.sequelize || sequelize;
+    var sequelize = options.sequelize || model.sequelize;
     var namespace = options.namespace;
     var excludeAttrs = options.exclude;
+    var schema = options.schema || model.options.schema;
+    var attributePrefix = options.attributePrefix;
 
     var versionModelName = '' + capitalize(prefix) + capitalize(model.name);
 
-    var versionFieldId = prefix + '_id';
-    var versionFieldType = prefix + '_type';
-    var versionFieldTimestamp = prefix + '_timestamp';
+    var versionFieldId = attributePrefix + '_id';
+    var versionFieldType = attributePrefix + '_type';
+    var versionFieldTimestamp = attributePrefix + '_timestamp';
 
     var versionAttrs = (_versionAttrs = {}, _defineProperty(_versionAttrs, versionFieldId, {
         type: Sequelize.BIGINT,
@@ -91,12 +95,12 @@ function Version(model, customOptions) {
     var tableName = prefix.toLowerCase() + '_' + (model.options.tableName || model.name.toLowerCase()) + (suffix ? '_' + suffix : '');
 
     var versionModelOptions = {
-        schema: options.schema || model.options.schema,
+        schema: schema,
         tableName: tableName,
         timestamps: false
     };
 
-    var versionModel = model.sequelize.define(versionModelName, versionModelAttrs, versionModelOptions);
+    var versionModel = sequelize.define(versionModelName, versionModelAttrs, versionModelOptions);
 
     hooks.forEach(function (hook) {
 
@@ -112,7 +116,7 @@ function Version(model, customOptions) {
 
             var versionData = Object.assign({}, data, (_Object$assign = {}, _defineProperty(_Object$assign, versionFieldType, versionType), _defineProperty(_Object$assign, versionFieldTimestamp, new Date()), _Object$assign));
 
-            var versionTransaction = namespace ? namespace.get('transaction') : transaction;
+            var versionTransaction = namespace ? namespace.get('transaction') || transaction : transaction;
 
             return versionModel.build(versionData).save({ transaction: versionTransaction });
         });

@@ -16,7 +16,7 @@ yarn add sequelize-version
 ## Features
 
 * Track automatically all the changes of your model (create, update, delete), using hooks
-* Custom settings (version prefix, suffix, schema)
+* Custom settings (version prefix, suffix, schema and more)
 * Supports transaction 
 
 
@@ -36,6 +36,17 @@ sequelize.sync().then(() => {
     console.log('sync done!')
 });
 ```
+
+## Options
+
+|Name            |Type               |Default       |Description
+|----------------|-------------------|--------------|--------------------------------
+|prefix          | `string`          | `'version'`  | Table name prefix
+|suffix          | `string`          | `''`         | Table name suffix
+|attributePrefix | `string`          | `'version'`  | Attribute prefix for version fields (version id, type and timestamp)
+|schema          | `string`          | `''`         | Version model schema, uses from origin model when empty
+|sequelize       | `sequelize`       | `null`       | Sequelize instance, uses from origin model when null
+|exclude         | `Array<string>`   | `[]`       | Attributes to ignore 
 
 ## Examples
 
@@ -102,18 +113,34 @@ console.log(JSON.parse(JSON.stringify(versions)));
 ```
 ### Custom options
 ```js
-const prefix = ''; 
-const suffix = 'log'; 
-const schema = 'audit';
+//customization examples
+const customOptions = {
+    
+    //table name prefix
+    prefix: '', //
+
+    //table name suffix
+    suffix: 'log', 
+
+    //attribute prefix
+    attributePrefix: 'revision', 
+
+    //version model schema
+    schema: 'audit',
+
+    //you can use another sequelize instance 
+    sequelize: new Sequelize(...), 
+
+    //atributes to ignore from origin model
+    exclude: ['createdAt', 'updateAt'] 
+
+}
 
 // single options
-const VersionModel = new Version(Model, {prefix, suffix, schema});
-
+const VersionModel = new Version(Model, customOptions);
 
 // global options
-Version.defaults.prefix = prefix; //default 'version'
-Version.defaults.suffix = suffix; //default ''
-Version.defaults.schema = schema; //default '' - if empty string, will be used the same schema of the origin model
+Version.defaults = customOptions;
 ```
 
 
@@ -139,7 +166,9 @@ sequelize.transaction(() => {
 const AuditModel = new Version(Person);
 
 const personWhenCreated = await AuditModel.scope('created').find({where: {id: persion.id}});
+
 const allVersionsUpdated = await AuditModel.scope('updated').findAll();;
+
 const personWhenDeleted = await AuditModel.scope('deleted').find({where: {id: persion.id}});
 ```
 

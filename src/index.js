@@ -42,7 +42,9 @@ const VersionType = {
 
 const defaults = {
     prefix: 'version',
+    attributePrefix: 'version',
     suffix: '',
+    schema: '',
     namespace: null,
     sequelize: null,
     exclude: [],
@@ -66,12 +68,14 @@ function Version(model, customOptions) {
     const sequelize = options.sequelize || model.sequelize;
     const namespace = options.namespace;
     const excludeAttrs = options.exclude;
+    const schema = options.schema || model.options.schema;
+    const attributePrefix = options.attributePrefix;
     
     const versionModelName = `${capitalize(prefix)}${capitalize(model.name)}`;
     
-    const versionFieldId = `${prefix}_id`;
-    const versionFieldType = `${prefix}_type`;
-    const versionFieldTimestamp = `${prefix}_timestamp`
+    const versionFieldId = `${attributePrefix}_id`;
+    const versionFieldType = `${attributePrefix}_type`;
+    const versionFieldTimestamp = `${attributePrefix}_timestamp`;
 
     const versionAttrs = {
         [versionFieldId]: {
@@ -94,7 +98,7 @@ function Version(model, customOptions) {
     const tableName = `${prefix.toLowerCase()}_${model.options.tableName || model.name.toLowerCase()}${suffix ? `_${suffix}`:''}`;
 
     const versionModelOptions = {
-        schema: options.schema || model.options.schema,
+        schema,
         tableName,
         timestamps: false,
     }
