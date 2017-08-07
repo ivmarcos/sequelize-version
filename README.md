@@ -114,11 +114,10 @@ Version.defaults.schema = schema; //default '' - if empty string, will be used t
 
 ### Transaction
 ```js
-
 //version uses the model transaction
 sequelize.transaction(transaction => {
 
-    return TestModel.build({name: 'Test with transaction'}).save({transaction});
+    return Person.build({name: 'Jack'}).save({transaction});
 
 });
 ```
