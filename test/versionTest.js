@@ -3,6 +3,7 @@ const Version = require('../index');
 const Sequelize = require('sequelize');
 const env = process.env;
 
+
 function getRawData(instance){
     return JSON.parse(JSON.stringify(instance));
 }
@@ -178,6 +179,50 @@ describe('sequelize-version', () => {
         test().then(result => done(result)).catch(err => done(err));
 
     });
+
+    it('must support cls transaction', done => {
+        const cls = require('continuation-local-storage');
+        const env = process.env;
+
+        const namespace = cls.createNamespace('my-very-own-namespace');
+        Sequelize.useCLS(namespace);
+
+        const ERR_MSG = 'ROLLBACK_CLS_TEST';
+
+        const test = async() => {
+
+
+            try{
+
+                await sequelize.transaction(() => {
+
+                    return TestModel.build({name: 'test transaction with cls'}).save().then(() => Promise.reject(new Error(ERR_MSG)));
+
+                }).catch(async err => {
+
+                    if (err.message === ERR_MSG){
+                        const versions = await VersionModel.findAll();
+                        assert.equal(versions.length, 0);
+
+                    }else{
+                        assert.fail(err);
+                    }
+
+
+                });
+
+            }catch(err){
+
+                return err;
+
+            }
+
+
+        }
+
+
+        test().then(result => done(result)).catch(err => done(err));
+    })
 
     it ('must support custom options', done => {
 

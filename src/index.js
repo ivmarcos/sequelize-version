@@ -111,7 +111,7 @@ function Version(model, customOptions) {
 
             const versionData = Object.assign({}, data, {[versionFieldType]: versionType, [versionFieldTimestamp]: new Date()});
 
-            const versionTransaction = namespace ? namespace.get('transaction') : transaction;
+            const versionTransaction = namespace ? (namespace.get('transaction') || transaction) : transaction;
             
             return versionModel.build(versionData).save({transaction : versionTransaction});
 

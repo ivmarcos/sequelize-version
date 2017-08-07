@@ -30,6 +30,11 @@ const sequelize = new Sequelize(...);
 const Person = sequelize.define('Person', ...);
 
 const PersonVersion = new Version(Person);
+
+//sync with database
+sequelize.sync().then(() => {
+    console.log('sync done!')
+});
 ```
 
 ## Examples
@@ -114,21 +119,28 @@ Version.defaults.schema = schema; //default '' - if empty string, will be used t
 
 ### Transaction
 ```js
-//version uses the model transaction
+//version uses the origin model transaction
 sequelize.transaction(transaction => {
 
     return Person.build({name: 'Jack'}).save({transaction});
 
 });
+
+//or, if you are using cls - http://docs.sequelizejs.com/manual/tutorial/transactions.html#without-cls-enabled
+sequelize.transaction(() => {
+
+    return Person.build({name: 'Jack'}).save();
+})
 ```
 
 ### Find by version type (create, save, delete)
 ```js
-const AuditModel = new Version(TestModel);
 
-const created = await AuditModel.findAll({where: {version_type: Version.VersionType.CREATED}});
-const updated = await AuditModel.findAll({where: {version_type: Version.VersionType.UPDATED}});
-const deleted = await AuditModel.findAll({where: {version_type: Version.VersionType.DELETED}});
+const AuditModel = new Version(Person);
+
+const personWhenCreated = await AuditModel.scope('created').find({where: {id: persion.id}});
+const allVersionsUpdated = await AuditModel.scope('updated').findAll();;
+const personWhenDeleted = await AuditModel.scope('deleted').find({where: {id: persion.id}});
 ```
 
 ## License
