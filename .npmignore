@@ -6,4 +6,5 @@ test
 .eslintrc.json
 .babelrc
 .gitignore
+.codeclimate.yml
 npm-debug.log

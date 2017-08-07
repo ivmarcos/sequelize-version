@@ -142,28 +142,24 @@ Version.defaults = customOptions;
 ```js
 //version uses the origin model transaction
 sequelize.transaction(transaction => {
-
     return Person.build({name: 'Jack'}).save({transaction});
-
 });
 
 //or, if you are using cls - http://docs.sequelizejs.com/manual/tutorial/transactions.html#without-cls-enabled
 sequelize.transaction(() => {
-
     return Person.build({name: 'Jack'}).save();
 })
 ```
 
 ### Find by version type (create, save, delete)
 ```js
-
 const AuditModel = new Version(Person);
 
 // default scopes created in version model (created, updated, deleted)
 
 const personWhenCreated = await AuditModel.scope('created').find({where: {id: person.id}});
 
-const updates = await AuditModel.scope('updated').findAll();;
+const updates = await AuditModel.scope('updated').findAll();
 
 const personWhenDeleted = await AuditModel.scope('deleted').find({where: {id: person.id}});
 ```
