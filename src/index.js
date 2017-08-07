@@ -99,7 +99,7 @@ function Version(model, customOptions) {
         timestamps: false,
     }
 
-    const versionModel = model.sequelize.define(versionModelName, versionModelAttrs, versionModelOptions)
+    const versionModel = sequelize.define(versionModelName, versionModelAttrs, versionModelOptions)
 
     hooks.forEach(hook => {
 
