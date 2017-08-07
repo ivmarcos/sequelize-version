@@ -9,9 +9,11 @@ function cloneAttrs(model, attrs, excludeAttrs){
 
     let clone = {};
 
-    const attributes = model.attributes.filter(attr => !excludeAttrs.some(excludeAttr => excludeAttr === attr));
+    const attributes = model.attributes;
 
     for (let p in attributes){
+
+        if (excludeAttrs.some(p)) continue;
 
         let nestedClone = {};
         
@@ -120,7 +122,6 @@ function Version(model, customOptions) {
     versionModel.addScope('created', {where: {[versionFieldType]: VersionType.CREATED}});
     versionModel.addScope('updated', {where: {[versionFieldType]: VersionType.UPDATED}});
     versionModel.addScope('deleted', {where: {[versionFieldType]: VersionType.DELETED}});
-
 
     return versionModel;
 
