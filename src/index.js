@@ -13,7 +13,7 @@ function cloneAttrs(model, attrs, excludeAttrs){
 
     for (let p in attributes){
 
-        if (excludeAttrs.some(p)) continue;
+        if (excludeAttrs.includes(p)) continue;
 
         let nestedClone = {};
         
