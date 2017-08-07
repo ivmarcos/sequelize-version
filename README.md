@@ -163,7 +163,7 @@ const AuditModel = new Version(Person);
 
 const personWhenCreated = await AuditModel.scope('created').find({where: {id: person.id}});
 
-const allVersionsUpdated = await AuditModel.scope('updated').findAll();;
+const updates = await AuditModel.scope('updated').findAll();;
 
 const personWhenDeleted = await AuditModel.scope('deleted').find({where: {id: person.id}});
 ```
