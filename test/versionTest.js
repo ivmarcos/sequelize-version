@@ -1,6 +1,8 @@
 const assert = require('assert');
 const Version = require('../index');
 const Sequelize = require('sequelize');
+const cls = require('continuation-local-storage');
+const namespace = cls.createNamespace('my-very-own-namespace');
 const env = process.env;
 
 
@@ -181,10 +183,7 @@ describe('sequelize-version', () => {
     });
 
     it('must support cls transaction', done => {
-        const cls = require('continuation-local-storage');
-        const env = process.env;
 
-        const namespace = cls.createNamespace('my-very-own-namespace');
         Sequelize.useCLS(namespace);
 
         const ERR_MSG = 'ROLLBACK_CLS_TEST';
@@ -233,12 +232,15 @@ describe('sequelize-version', () => {
             dialect: 'postgres',
         });   
 
+        Sequelize.useCLS(namespace);
+
         const customOptions = {
             schema: 'test2',
             prefix: 'audit',
             suffix: 'log',
             exclude: ['createdAt', 'updatedAt'],
             attributePrefix: 'revision',
+            namespace,
             sequelize: sequelize2
         };
 
