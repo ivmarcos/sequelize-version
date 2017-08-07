@@ -29,11 +29,6 @@ const sequelize = new Sequelize(...);
 const Person = sequelize.define('Person', ...);
 
 const PersonVersion = new Version(Person);
-
-//sync with database
-sequelize.sync().then(() => {
-    console.log('sync done!')
-});
 ```
 
 ## Options
