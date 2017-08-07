@@ -115,12 +115,14 @@ function Version(model, customOptions) {
 
             const versionData = Object.assign({}, data, {[versionFieldType]: versionType, [versionFieldTimestamp]: new Date()});
 
-            let versionTransaction;
+            const cls = namespace || Sequelize.cls;
 
+            let versionTransaction;
+            
             if (sequelize === model.sequelize){
-                versionTransaction = namespace ? (namespace.get('transaction') || transaction) : transaction;
+                versionTransaction = cls ? (cls.get('transaction') || transaction) : transaction;
             }else{
-                versionTransaction = namespace ? namespace.get('transaction') : undefined;
+                versionTransaction = cls ? cls.get('transaction') : undefined;
             }
             
             return versionModel.build(versionData).save({transaction : versionTransaction});

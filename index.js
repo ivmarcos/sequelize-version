@@ -116,7 +116,15 @@ function Version(model, customOptions) {
 
             var versionData = Object.assign({}, data, (_Object$assign = {}, _defineProperty(_Object$assign, versionFieldType, versionType), _defineProperty(_Object$assign, versionFieldTimestamp, new Date()), _Object$assign));
 
-            var versionTransaction = namespace ? namespace.get('transaction') || transaction : transaction;
+            var cls = namespace || Sequelize.cls;
+
+            var versionTransaction = void 0;
+
+            if (sequelize === model.sequelize) {
+                versionTransaction = cls ? cls.get('transaction') || transaction : transaction;
+            } else {
+                versionTransaction = cls ? cls.get('transaction') : undefined;
+            }
 
             return versionModel.build(versionData).save({ transaction: versionTransaction });
         });
