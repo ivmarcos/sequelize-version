@@ -63,7 +63,7 @@ function Version(model, customOptions) {
    
     const prefix = options.prefix;
     const suffix = options.suffix;
-    const sequelize = options.sequelize || sequelize;
+    const sequelize = options.sequelize || model.sequelize;
     const namespace = options.namespace;
     const excludeAttrs = options.exclude;
     
