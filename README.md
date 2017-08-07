@@ -157,11 +157,11 @@ const AuditModel = new Version(Person);
 
 // default scopes created in version model (created, updated, deleted)
 
-const personWhenCreated = await AuditModel.scope('created').find({where: {id: person.id}});
+const versionWhenCreated = await AuditModel.scope('created').find({where: {id: person.id}});
 
 const updates = await AuditModel.scope('updated').findAll();
 
-const personWhenDeleted = await AuditModel.scope('deleted').find({where: {id: person.id}});
+const versionWhenDeleted = await AuditModel.scope('deleted').find({where: {id: person.id}});
 ```
 
 ## License
