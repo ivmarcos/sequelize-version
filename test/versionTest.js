@@ -134,9 +134,6 @@ describe('sequelize-version', () => {
                 assert.equal(Version.VersionType.DELETED, result[2].version_type);
                 done();
             }
-
-            
-            
             
         }).catch(err => done(err));
 

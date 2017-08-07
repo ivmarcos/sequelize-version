@@ -5,11 +5,11 @@ function capitalize(string){
 }
 
 
-function cloneAttrs(model, attrs){
+function cloneAttrs(model, attrs, excludeAttrs){
 
     let clone = {};
 
-    const attributes = model.attributes;
+    const attributes = model.attributes.filter(attr => !excludeAttrs.some(excludeAttr => excludeAttr === attr));
 
     for (let p in attributes){
 
@@ -41,6 +41,9 @@ const VersionType = {
 const defaults = {
     prefix: 'version',
     suffix: '',
+    namespace: null,
+    sequelize: null,
+    exclude: [],
 }
 
 const hooks = ['afterCreate', 'afterUpdate', 'afterDestroy'];
@@ -58,6 +61,9 @@ function Version(model, customOptions) {
    
     const prefix = options.prefix;
     const suffix = options.suffix;
+    const sequelize = options.sequelize || sequelize;
+    const namespace = options.namespace;
+    const excludeAttrs = options.exclude;
     
     const versionModelName = `${capitalize(prefix)}${capitalize(model.name)}`;
     
@@ -81,7 +87,7 @@ function Version(model, customOptions) {
         },
     }
 
-    const cloneModelAttrs = cloneAttrs(model, attrsToClone);
+    const cloneModelAttrs = cloneAttrs(model, attrsToClone, excludeAttrs);
     const versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
     const tableName = `${prefix.toLowerCase()}_${model.options.tableName || model.name.toLowerCase()}${suffix ? `_${suffix}`:''}`;
 
@@ -102,12 +108,18 @@ function Version(model, customOptions) {
             const data = JSON.parse(JSON.stringify(instanceData));
 
             const versionData = Object.assign({}, data, {[versionFieldType]: versionType, [versionFieldTimestamp]: new Date()});
+
+            const versionTransaction = namespace ? namespace.get('transaction') : transaction;
             
-            return versionModel.build(versionData).save({transaction});
+            return versionModel.build(versionData).save({transaction : versionTransaction});
 
         })
 
     });
+
+    versionModel.addScope('created', {where: {[versionFieldType]: VersionType.CREATED}});
+    versionModel.addScope('updated', {where: {[versionFieldType]: VersionType.UPDATED}});
+    versionModel.addScope('deleted', {where: {[versionFieldType]: VersionType.DELETED}});
 
 
     return versionModel;
