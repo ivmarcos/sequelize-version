@@ -145,7 +145,7 @@ sequelize.transaction(transaction => {
     return Person.build({name: 'Jack'}).save({transaction});
 });
 
-//or, if you are using cls - http://docs.sequelizejs.com/manual/tutorial/transactions.html#without-cls-enabled
+//or, if you are using cls - http://docs.sequelizejs.com/manual/tutorial/transactions.html#automatically-pass-transactions-to-all-queries
 sequelize.transaction(() => {
     return Person.build({name: 'Jack'}).save();
 })
