@@ -4,7 +4,6 @@ function capitalize(string){
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-
 function cloneAttrs(model, attrs, excludeAttrs){
 
     let clone = {};
@@ -134,6 +133,33 @@ function Version(model, customOptions) {
     versionModel.addScope('created', {where: {[versionFieldType]: VersionType.CREATED}});
     versionModel.addScope('updated', {where: {[versionFieldType]: VersionType.UPDATED}});
     versionModel.addScope('deleted', {where: {[versionFieldType]: VersionType.DELETED}});
+
+    if (!model.prototype.hasOwnProperty('getVersions')){
+
+        model.prototype.getVersions = function(params) {
+        
+            let versionParams = {};
+        
+            const primaryKeys = Object.keys(model.attributes).filter(attr => model.attributes[attr].primaryKey);
+        
+            if (primaryKeys.length) {
+                versionParams.where = primaryKeys.map(attr => ({[attr]: this[attr]})).reduce((a, b) => Object.assign({}, a, b));
+            }
+        
+            if (params){
+                if (params.where) versionParams.where = Object.assign({}, params.where, versionParams.where);
+                versionParams = Object.assign({}, params, versionParams);
+            }
+
+            return versionModel.findAll(versionParams);
+
+        }
+
+        model.getVersions = (params) => versionModel.findAll(params);
+
+    }
+
+
 
     return versionModel;
 

@@ -134,6 +134,38 @@ function Version(model, customOptions) {
     versionModel.addScope('updated', { where: _defineProperty({}, versionFieldType, VersionType.UPDATED) });
     versionModel.addScope('deleted', { where: _defineProperty({}, versionFieldType, VersionType.DELETED) });
 
+    if (!model.prototype.hasOwnProperty('getVersions')) {
+
+        model.prototype.getVersions = function (params) {
+            var _this = this;
+
+            var versionParams = {};
+
+            var primaryKeys = Object.keys(model.attributes).filter(function (attr) {
+                return model.attributes[attr].primaryKey;
+            });
+
+            if (primaryKeys.length) {
+                versionParams.where = primaryKeys.map(function (attr) {
+                    return _defineProperty({}, attr, _this[attr]);
+                }).reduce(function (a, b) {
+                    return Object.assign({}, a, b);
+                });
+            }
+
+            if (params) {
+                if (params.where) versionParams.where = Object.assign({}, params.where, versionParams.where);
+                versionParams = Object.assign({}, params, versionParams);
+            }
+
+            return versionModel.findAll(versionParams);
+        };
+
+        model.getVersions = function (params) {
+            return versionModel.findAll(params);
+        };
+    }
+
     return versionModel;
 }
 

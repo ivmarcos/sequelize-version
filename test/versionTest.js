@@ -28,6 +28,11 @@ const TestModel = sequelize.define('test', {
         autoIncrement: true,
         primaryKey: true,
     },
+    parent_id: {
+        type: Sequelize.BIGINT,
+        primaryKey: true,
+        defaultValue: 1,
+    },
     name: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -267,7 +272,7 @@ describe('sequelize-version', () => {
                 return Promise.all([
                     VersionModel.findAll({where: {id: testInstance.id}}),
                     V2.findAll({where: {id: testInstance.id}}),
-                    Promise.resolve(testInstance)
+                    Promise.resolve(testInstance),
                 ]);    
                     
             }catch(err){
@@ -292,6 +297,8 @@ describe('sequelize-version', () => {
 
             assert.equal(attributesCloned.length, attributes.length - customOptions.exclude.length);
             assert.equal(attributesVersion.length, attributes.length - customOptions.exclude.length + 3)
+            assert.equal(vs1.length, 1);
+            assert.equal(vs2.length, 1)
             
             attributesCloned.forEach(attr => {
                 assert.deepEqual(vs1[0][attr], testInstance[attr])
@@ -434,8 +441,54 @@ describe('sequelize-version', () => {
 
         }).catch(err => done(err));
 
-    })
+    });
 
+    it ('getVersions function instance and class methods', done => {
+
+         const test = async() => {
+
+            try{
+                
+                const testInstance = await TestModel.build({name: 'test with getVersions'}).save();
+
+                const testInstance2 = await TestModel.build({name: 'test 2 with getVersions'}).save();
+                
+                await testInstance2.destroy();
+
+                return Promise.all([
+                    testInstance.getVersions(),
+                    TestModel.getVersions(),
+                    testInstance.getVersions({where : {name: {like: '%test%'}}}),
+                    TestModel.getVersions({where : {name: {like: '%test 2%'}}}),
+                ]);    
+
+            }catch(err){
+
+                return err;
+            }
+
+        }
+
+         test().then(result => {
+
+            if (typeof result === 'error') return done(result);
+
+            const instanceVersions = result[0];
+            const allVersions = result[1];
+            const instanceVersionsWithParams = result[2];
+            const versionsWithParams = result[3];
+
+            assert.equal(1, instanceVersions.length);
+            assert.equal(3, allVersions.length);
+            assert.equal(1, instanceVersionsWithParams.length);
+            assert.equal(2, versionsWithParams.length);
+
+          
+            done();
+
+        }).catch(err => done(err));
+
+    });
    
 
 });

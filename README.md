@@ -19,7 +19,7 @@ yarn add sequelize-version
 * Supports transaction 
 
 
-## Basic Usage
+## Usage
 ```js
 const Sequelize = require('sequelize');
 const Version = require('sequelize-version');
@@ -44,40 +44,30 @@ const PersonVersion = new Version(Person);
 
 ## Examples
 
-### Basic 
+### Checking the versions
 ```js
 // let's create a person for test
 let person = await Person.build({name: 'Jack'}).save();
 
-// let's check the result
-console.log(JSON.parse(JSON.stringify(person)));
-/*
-{
-    id: 1,
-    name: 'Jack'
-}
-*/
-
 // now we change a name
 person.name = 'Jack Johnson';
 
-// and update 
+// update 
 person = await person.save();
 
-console.log(JSON.parse(JSON.stringify(person)));
-/*
-{
-    id: 1,
-    name: 'Jack Johnson'
-}
-*/
-
-// now we delete
+// and delete
 await person.destroy();
 
-// finally, we check the modifications
+// finally, get the versions
 const versions = await PersonVersion.findAll({where : {id: person.id}});
 
+// or, even simpler
+const versionsByInstance = await person.getVersions();
+
+// this way too
+const versionsByModel = await Person.getVersions({where : {id: person.id}});
+
+// versions added
 console.log(JSON.parse(JSON.stringify(versions)));
 /*
 [
@@ -151,15 +141,22 @@ sequelize.transaction(() => {
 })
 ```
 
-### Find by version type (create, save, delete)
+### Querying
 ```js
 // default scopes created in version model (created, updated, deleted)
-
 const versionCreated = await VersionModel.scope('created').find({where: {id: person.id}});
 
 const versionUpdates = await VersionModel.scope('updated').findAll();
 
 const versionDeleted = await VersionModel.scope('deleted').find({where: {id: person.id}});
+
+// using origin model and regular sequelize params
+const allVersions = await Person.getVersions({where : {name: {like: 'Jack%'}}});
+
+// using instance from origin model and sequelize params
+const person = await Person.findById(1);
+
+const versionsForOnlyThisPerson = person.getVersions({where: {name: {like: '%Johnson'}}});
 ```
 
 ## License
