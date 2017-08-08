@@ -126,7 +126,7 @@ const customOptions = {
     sequelize: new Sequelize(...), 
 
     //attributes to ignore from origin model
-    exclude: ['createdAt', 'updateAt'] 
+    exclude: ['createdAt', 'updatedAt'] 
 
 }
 
