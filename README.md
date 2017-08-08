@@ -101,7 +101,7 @@ console.log(JSON.parse(JSON.stringify(versions)));
 const customOptions = {
     
     //table name prefix
-    prefix: '', //
+    prefix: '', 
 
     //table name suffix
     suffix: 'log', 
@@ -150,13 +150,13 @@ const versionUpdates = await VersionModel.scope('updated').findAll();
 
 const versionDeleted = await VersionModel.scope('deleted').find({where: {id: person.id}});
 
-// using origin model and regular sequelize params
+// using origin model
 const allVersions = await Person.getVersions({where : {name: {like: 'Jack%'}}});
 
-// using instance from origin model and sequelize params
+// using instance from origin model
 const person = await Person.findById(1);
 
-const versionsForOnlyThisPerson = person.getVersions({where: {name: {like: '%Johnson'}}});
+const versionsForOnlyThisPerson = await person.getVersions({where: {name: {like: '%Johnson'}}});
 ```
 
 ## License
