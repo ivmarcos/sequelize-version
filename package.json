@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "pretest": "yarn build",
-    "test": "mocha",
+    "test": "babel-node mocha",
     "test:dev": "nodemon --exec 'yarn test' --ignore node_modules --ignore index.js --watch src",
     "build": "babel src -o index.js",
     "preversion": "yarn test",
@@ -31,6 +31,7 @@
   "homepage": "https://github.com/ivmarcos/sequelize-version#readme",
   "devDependencies": {
     "babel-cli": "^6.24.1",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "babel-plugin-transform-remove-console": "^6.8.4",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
