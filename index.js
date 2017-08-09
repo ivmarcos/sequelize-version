@@ -167,7 +167,7 @@ function Version(model, customOptions) {
         }
     } else {
 
-        var hooksForBind = ['afterCreate', 'afterDestroy', 'afterUpdate', 'afterSave', 'afterSave'];
+        var hooksForBind = ['afterCreate', 'afterDestroy', 'afterUpdate', 'afterSave'];
 
         hooksForBind.forEach(function (hook) {
             model.addHook(hook, function (instance) {

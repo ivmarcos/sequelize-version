@@ -163,7 +163,7 @@ function Version(model, customOptions) {
     
     }else{
 
-        const hooksForBind = ['afterCreate', 'afterDestroy', 'afterUpdate', 'afterSave', 'afterSave'];
+        const hooksForBind = ['afterCreate', 'afterDestroy', 'afterUpdate', 'afterSave'];
         
         hooksForBind.forEach(hook => {
             model.addHook(hook, (instance) => {
