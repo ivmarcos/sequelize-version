@@ -1,18 +1,5 @@
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.Version = Version;
-var SequelizeVersion = require('./index');
-
-function Version(options) {
-    return function (target) {
-        new SequelizeVersion(target, options);
-    };
-}
-'use strict';
-
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 var Sequelize = require('sequelize');

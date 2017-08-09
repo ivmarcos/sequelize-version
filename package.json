@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "pretest": "yarn build",
-    "test": "babel-node mocha",
+    "test": "mocha",
     "test:dev": "nodemon --exec 'yarn test' --ignore node_modules --ignore index.js --watch src",
     "build": "babel src -o index.js",
     "preversion": "yarn test",
