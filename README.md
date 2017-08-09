@@ -44,7 +44,7 @@ const PersonVersion = new Version(Person);
 
 ## Examples
 
-### Checking the versions
+### Checking versions
 ```js
 // let's create a person for test
 let person = await Person.build({name: 'Jack'}).save();
