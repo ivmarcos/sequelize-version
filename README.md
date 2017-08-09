@@ -155,7 +155,6 @@ const allVersions = await Person.getVersions({where : {name: {like: 'Jack%'}}});
 
 // using instance from origin model
 const person = await Person.findById(1);
-
 const versionsForOnlyThisPerson = await person.getVersions({where: {name: {like: '%Johnson'}}});
 ```
 
