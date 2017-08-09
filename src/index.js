@@ -134,7 +134,7 @@ function Version(model, customOptions) {
     versionModel.addScope('updated', {where: {[versionFieldType]: VersionType.UPDATED}});
     versionModel.addScope('deleted', {where: {[versionFieldType]: VersionType.DELETED}});
 
-    if (!model.prototype.hasOwnProperty('getVersions')){
+    if (!model.prototype.hasOwnProperty('getVersions')){ 
 
         model.prototype.getVersions = function(params) {
         
