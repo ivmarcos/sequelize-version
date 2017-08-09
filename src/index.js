@@ -134,32 +134,49 @@ function Version(model, customOptions) {
     versionModel.addScope('updated', {where: {[versionFieldType]: VersionType.UPDATED}});
     versionModel.addScope('deleted', {where: {[versionFieldType]: VersionType.DELETED}});
 
-    if (!model.prototype.hasOwnProperty('getVersions')){ 
-
-        model.prototype.getVersions = function(params) {
+    function getVersions(params){
         
-            let versionParams = {};
-        
-            const primaryKeys = Object.keys(model.attributes).filter(attr => model.attributes[attr].primaryKey);
-        
-            if (primaryKeys.length) {
-                versionParams.where = primaryKeys.map(attr => ({[attr]: this[attr]})).reduce((a, b) => Object.assign({}, a, b));
-            }
-        
-            if (params){
-                if (params.where) versionParams.where = Object.assign({}, params.where, versionParams.where);
-                versionParams = Object.assign({}, params, versionParams);
-            }
-
-            return versionModel.findAll(versionParams);
-
+        let versionParams = {};
+            
+        const primaryKeys = Object.keys(model.attributes).filter(attr => model.attributes[attr].primaryKey);
+            
+        if (primaryKeys.length) {
+            versionParams.where = primaryKeys.map(attr => ({[attr]: this[attr]})).reduce((a, b) => Object.assign({}, a, b));
+        }
+            
+        if (params){
+            if (params.where) versionParams.where = Object.assign({}, params.where, versionParams.where);
+            versionParams = Object.assign({}, params, versionParams);
         }
 
-        model.getVersions = (params) => versionModel.findAll(params);
+        return versionModel.findAll(versionParams);
 
     }
 
+    if (model.prototype){
 
+        if (!model.prototype.hasOwnProperty('getVersions')){ 
+            
+            model.prototype.getVersions = getVersions;
+    
+        }
+    
+    }else{
+
+        const hooksForBind = ['afterCreate', 'afterDestroy', 'afterUpdate', 'afterSave', 'afterSave'];
+        
+        hooksForBind.forEach(hook => {
+            model.addHook(hook, (instance) => {
+                if (!instance.getVersions) instance.getVersions = getVersions;
+            })
+        })
+    }
+
+    if (!model.getVersions){
+
+        model.getVersions = (params) => versionModel.findAll(params);
+        
+    }
 
     return versionModel;
 

@@ -5,6 +5,13 @@ const cls = require('continuation-local-storage');
 const namespace = cls.createNamespace('my-very-own-namespace');
 const env = process.env;
 
+function useCLS(Sequelize, namespace){
+    if (Sequelize.useCLS){
+        Sequelize.useCLS(namespace);
+    }else{
+        Sequelize.cls = namespace;
+    }
+}
 
 function clone(instance){
     return JSON.parse(JSON.stringify(instance));
@@ -189,7 +196,7 @@ describe('sequelize-version', () => {
 
     it('must support cls transaction', done => {
 
-        Sequelize.useCLS(namespace);
+        useCLS(Sequelize, namespace);
 
         const ERR_MSG = 'ROLLBACK_CLS_TEST';
 
@@ -237,7 +244,7 @@ describe('sequelize-version', () => {
             dialect: 'postgres',
         });   
 
-        Sequelize.useCLS(namespace);
+        useCLS(Sequelize, namespace);
 
         const customOptions = {
             schema: 'test2',
@@ -445,16 +452,19 @@ describe('sequelize-version', () => {
 
     it ('getVersions function instance and class methods', done => {
 
+
          const test = async() => {
 
             try{
                 
                 const testInstance = await TestModel.build({name: 'test with getVersions'}).save();
-
+                
                 const testInstance2 = await TestModel.build({name: 'test 2 with getVersions'}).save();
                 
                 await testInstance2.destroy();
 
+                if (!testInstance.getVersions) return Promise.reject(new Error('no instance function'))
+                        
                 return Promise.all([
                     testInstance.getVersions(),
                     TestModel.getVersions(),
