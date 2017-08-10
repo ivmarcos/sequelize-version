@@ -116,7 +116,7 @@ function Version(model, customOptions) {
 
     const cloneModelAttrs = cloneAttrs(model, attrsToClone, excludeAttrs);
     const versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
-    const tableName = `${prefix.toLowerCase()}_${model.options.tableName || model.name.toLowerCase()}${suffix ? `_${suffix}`:''}`;
+    const tableName = `${prefix}_${model.options.tableName || model.name}${suffix ? `_${suffix}`:''}`;
 
     const versionModelOptions = {
         schema,
