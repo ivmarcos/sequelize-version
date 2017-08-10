@@ -183,12 +183,15 @@ function Version(model, customOptions) {
         return versionModel.findAll(versionParams);
     }
 
+    // Sequelize V4 
     if (model.prototype) {
 
         if (!model.prototype.hasOwnProperty('getVersions')) {
 
             model.prototype.getVersions = getVersions;
         }
+
+        //Sequelize V3 and above
     } else {
 
         var hooksForBind = hooks.concat([Hook.AFTER_SAVE]);
