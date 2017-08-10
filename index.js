@@ -8,6 +8,14 @@ function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+function toArray(value) {
+    return Array.isArray(value) ? value : [value];
+}
+
+function clone(value) {
+    return JSON.parse(JSON.stringify(value));
+}
+
 function cloneAttrs(model, attrs, excludeAttrs) {
 
     var clone = {};
@@ -40,6 +48,13 @@ var VersionType = {
     DELETED: 3
 };
 
+var Hook = {
+    AFTER_CREATE: 'afterCreate',
+    AFTER_UPDATE: 'afterUpdate',
+    AFTER_DESTROY: 'afterDestroy',
+    AFTER_SAVE: 'afterSave',
+    AFTER_BULK_CREATE: 'afterBulkCreate'
+};
 var defaults = {
     prefix: 'version',
     attributePrefix: 'version',
@@ -50,13 +65,20 @@ var defaults = {
     exclude: []
 };
 
-var hooks = ['afterCreate', 'afterUpdate', 'afterDestroy'];
+var hooks = [Hook.AFTER_CREATE, Hook.AFTER_UPDATE, Hook.AFTER_BULK_CREATE, Hook.AFTER_DESTROY];
+
 var attrsToClone = ['type', 'field'];
 
 function getVersionType(hook) {
-    if (hook === 'afterCreate') return VersionType.CREATED;
-    if (hook === 'afterUpdate') return VersionType.UPDATED;
-    if (hook === 'afterDestroy') return VersionType.DELETED;
+    switch (hook) {
+        case Hook.AFTER_CREATE:case Hook.AFTER_BULK_CREATE:
+            return VersionType.CREATED;
+        case Hook.AFTER_UPDATE:
+            return VersionType.UPDATED;
+        case Hook.AFTER_DESTROY:
+            return VersionType.DELETED;
+    }
+    throw new Error('Version type not found for hook ' + hook);
 }
 
 function Version(model, customOptions) {
@@ -105,16 +127,8 @@ function Version(model, customOptions) {
     hooks.forEach(function (hook) {
 
         model.addHook(hook, function (instanceData, _ref) {
-            var _Object$assign;
-
             var transaction = _ref.transaction;
 
-
-            var versionType = getVersionType(hook);
-
-            var data = JSON.parse(JSON.stringify(instanceData));
-
-            var versionData = Object.assign({}, data, (_Object$assign = {}, _defineProperty(_Object$assign, versionFieldType, versionType), _defineProperty(_Object$assign, versionFieldTimestamp, new Date()), _Object$assign));
 
             var cls = namespace || Sequelize.cls;
 
@@ -126,7 +140,17 @@ function Version(model, customOptions) {
                 versionTransaction = cls ? cls.get('transaction') : undefined;
             }
 
-            return versionModel.build(versionData).save({ transaction: versionTransaction });
+            var versionType = getVersionType(hook);
+
+            var instancesData = toArray(instanceData);
+
+            var versionData = instancesData.map(function (data) {
+                var _Object$assign;
+
+                return Object.assign({}, clone(data), (_Object$assign = {}, _defineProperty(_Object$assign, versionFieldType, versionType), _defineProperty(_Object$assign, versionFieldTimestamp, new Date()), _Object$assign));
+            });
+
+            return versionModel.bulkCreate(versionData, { transaction: versionTransaction });
         });
     });
 
@@ -167,11 +191,14 @@ function Version(model, customOptions) {
         }
     } else {
 
-        var hooksForBind = ['afterCreate', 'afterDestroy', 'afterUpdate', 'afterSave'];
+        var hooksForBind = hooks.concat([Hook.AFTER_SAVE]);
 
         hooksForBind.forEach(function (hook) {
             model.addHook(hook, function (instance) {
-                if (!instance.getVersions) instance.getVersions = getVersions;
+                var instances = toArray(instance);
+                instances.forEach(function (i) {
+                    if (!i.getVersions) i.getVersions = getVersions;
+                });
             });
         });
     }

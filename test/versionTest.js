@@ -123,13 +123,16 @@ describe('sequelize-version', () => {
 
                 await testInstance.save();
                 await testInstance.destroy();
+                
+                const testInstance2 = await TestModel.create({name: 'test 2'});
+                await testInstance2.update({name: 'test 2 with update'});
 
-                const versionsInstance = await VersionModel.findAll({where : {
-                    id: testInstance.id
-                }});
-
-                return versionsInstance;
-               
+                await TestModel.bulkCreate([
+                    {name: 'bulk test1'},
+                    {name: 'bulk test2'}
+                ]);
+                                
+                return await VersionModel.findAll();
 
             }catch(err){
 
@@ -140,10 +143,11 @@ describe('sequelize-version', () => {
 
         test().then(result => {
 
-            if (typeof result === 'error') {
+            if (typeof result === 'error' || !Array.isArray(result)) {
                 done(result);
             }else{
-                assert.equal(result.length, 3);
+
+                assert.equal(result.length, 7);
                 assert.equal(Version.VersionType.CREATED, result[0].version_type);
                 assert.equal(Version.VersionType.UPDATED, result[1].version_type);
                 assert.equal(Version.VersionType.DELETED, result[2].version_type);
@@ -458,7 +462,7 @@ describe('sequelize-version', () => {
             try{
                 
                 const testInstance = await TestModel.build({name: 'test with getVersions'}).save();
-                
+
                 const testInstance2 = await TestModel.build({name: 'test 2 with getVersions'}).save();
                 
                 await testInstance2.destroy();
