@@ -112,7 +112,7 @@ const customOptions = {
     //version model schema
     schema: 'audit',
 
-    //you can use another sequelize instance 
+    //you can use another sequelize instance (overrides default - sequelize from origin model)
     sequelize: new Sequelize(...), 
 
     //attributes to ignore from origin model
