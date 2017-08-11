@@ -56,7 +56,7 @@ const Hook = {
 }
 const defaults = {
     prefix: 'version',
-    attributePrefix: 'version',
+    attributePrefix: '',
     suffix: '',
     schema: '',
     namespace: null,
@@ -90,7 +90,7 @@ function Version(model, customOptions) {
     const namespace = options.namespace;
     const excludeAttrs = options.exclude;
     const schema = options.schema || model.options.schema;
-    const attributePrefix = options.attributePrefix;
+    const attributePrefix = options.attributePrefix || options.prefix;
     
     const versionModelName = `${capitalize(prefix)}${capitalize(model.name)}`;
     

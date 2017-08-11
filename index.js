@@ -57,7 +57,7 @@ var Hook = {
 };
 var defaults = {
     prefix: 'version',
-    attributePrefix: 'version',
+    attributePrefix: '',
     suffix: '',
     schema: '',
     namespace: null,
@@ -92,7 +92,7 @@ function Version(model, customOptions) {
     var namespace = options.namespace;
     var excludeAttrs = options.exclude;
     var schema = options.schema || model.options.schema;
-    var attributePrefix = options.attributePrefix;
+    var attributePrefix = options.attributePrefix || options.prefix;
 
     var versionModelName = '' + capitalize(prefix) + capitalize(model.name);
 
@@ -114,7 +114,7 @@ function Version(model, customOptions) {
 
     var cloneModelAttrs = cloneAttrs(model, attrsToClone, excludeAttrs);
     var versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
-    var tableName = prefix.toLowerCase() + '_' + (model.options.tableName || model.name.toLowerCase()) + (suffix ? '_' + suffix : '');
+    var tableName = prefix + '_' + (model.options.tableName || model.name) + (suffix ? '_' + suffix : '');
 
     var versionModelOptions = {
         schema: schema,
