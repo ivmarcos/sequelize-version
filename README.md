@@ -100,13 +100,13 @@ console.log(JSON.parse(JSON.stringify(versions)));
 //customization examples
 const customOptions = {
     
-    //table name prefix
+    //table name and version attributes prefix
     prefix: '', 
 
     //table name suffix
     suffix: 'log', 
 
-    //attribute prefix
+    //attribute prefix (overrides default - prefix)
     attributePrefix: 'revision', 
 
     //version model schema
