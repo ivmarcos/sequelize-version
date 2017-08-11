@@ -109,7 +109,7 @@ describe('sequelize-version', () => {
 
         test().then(result => done(result)).catch(err => done(err));
 
-    })
+    });
 
 
     it ('all hooks working', done => {
