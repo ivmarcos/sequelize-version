@@ -37,7 +37,7 @@ const PersonVersion = new Version(Person);
 |----------------|-------------------|--------------|--------------------------------
 |prefix          | `string`          | `'version'`  | Table name prefix
 |suffix          | `string`          | `''`         | Table name suffix
-|attributePrefix | `string`          | `''`         | Attribute prefix for version fields (version id, type and timestamp), when empty uses prefix
+|attributePrefix | `string`          | `''`         | Attribute prefix for version fields (version id, type and timestamp), uses prefix when empty
 |schema          | `string`          | `''`         | Version model schema, version uses from origin model when empty
 |sequelize       | `sequelize`       | `null`       | Sequelize instance, version uses from origin model when null
 |exclude         | `Array<string>`   | `[]`         | Attributes to ignore 
