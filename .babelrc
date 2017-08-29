@@ -2,9 +2,5 @@
   "presets": ["es2015", "stage-0"],
   "ignore": [
     "node_modules"
-  ],
-  "plugins": [
-    "transform-remove-console"
-  ]
-  
+  ]  
 }

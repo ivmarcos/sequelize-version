@@ -4,6 +4,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 var Sequelize = require('sequelize');
 
+function warn(text) {
+    console.warn('Warning: ' + text);
+}
+
 function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
@@ -53,8 +57,12 @@ var Hook = {
     AFTER_UPDATE: 'afterUpdate',
     AFTER_DESTROY: 'afterDestroy',
     AFTER_SAVE: 'afterSave',
-    AFTER_BULK_CREATE: 'afterBulkCreate'
+    AFTER_BULK_CREATE: 'afterBulkCreate',
+    AFTER_UPSERT: 'afterUpsert',
+    AFTER_BULK_DESTROY: 'afterBulkDestroy',
+    AFTER_BULK_UPDATE: 'afterBulkUpdate'
 };
+
 var defaults = {
     prefix: 'version',
     attributePrefix: '',
@@ -66,6 +74,8 @@ var defaults = {
 };
 
 var hooks = [Hook.AFTER_CREATE, Hook.AFTER_UPDATE, Hook.AFTER_BULK_CREATE, Hook.AFTER_DESTROY];
+
+var hooksNotSupported = [Hook.AFTER_UPSERT, Hook.AFTER_BULK_DESTROY, Hook.AFTER_BULK_UPDATE];
 
 var attrsToClone = ['type', 'field'];
 
@@ -151,6 +161,13 @@ function Version(model, customOptions) {
             });
 
             return versionModel.bulkCreate(versionData, { transaction: versionTransaction });
+        });
+    });
+
+    hooksNotSupported.forEach(function (hook) {
+
+        model.addHook(hook, function () {
+            warn('When you use the sequelize ' + hook + ' method, instance changes cannot be tracked by sequelize-version.');
         });
     });
 

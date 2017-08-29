@@ -4,6 +4,14 @@ const Sequelize = require('sequelize');
 const cls = require('continuation-local-storage');
 const namespace = cls.createNamespace('my-very-own-namespace');
 const env = process.env;
+const consoleWarnQueues = [];
+
+function wrapConsoleWarn(){
+    console.warn = function(message){
+        consoleWarnQueues.push(message);
+        console.log.apply(console, arguments);
+    }
+}
 
 function useCLS(Sequelize, namespace){
     if (Sequelize.useCLS){
@@ -503,6 +511,32 @@ describe('sequelize-version', () => {
         }).catch(err => done(err));
 
     });
+
+    it('Must warn when using methods not supported', done => {
+
+       const test = async() => {
+
+            try{
+                
+                const testInstance = await TestModel.build({name: 'test with getVersions'}).save();
+
+                const testInstance2 = await TestModel.upsert({id: 2, name: 'test2'});
+              
+                return ;
+
+            }catch(err){
+
+                return err;
+            }
+
+        }
+
+        test.then(() => {
+            assert.equal(1, consoleWarnQueues.length);
+            done();
+        }).catch(err = done(err));
+
+    })
    
 
 });
