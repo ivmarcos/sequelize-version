@@ -44,6 +44,24 @@ function cloneAttrs(model, attrs, excludeAttrs){
 
 }
 
+function versionAttributes(options){
+    const attributePrefix = options.attributePrefix || options.prefix;
+    return {
+        [`${attributePrefix}_id`]: {
+            type: Sequelize.BIGINT,
+            primaryKey: true,
+            autoIncrement: true,
+        },
+        [`${attributePrefix}_type`]: {
+            type: Sequelize.INTEGER,
+            allowNull: false,
+        },
+        [`${attributePrefix}_timestamp`]: {
+            type: Sequelize.DATE,
+            allowNull: false,
+        },
+    }
+}
 
 const VersionType = {
     CREATED: 1,
@@ -70,6 +88,7 @@ const defaults = {
     namespace: null,
     sequelize: null,
     exclude: [],
+    versionAttributes,
 }
 
 const hooks = [Hook.AFTER_CREATE, Hook.AFTER_UPDATE, Hook.AFTER_BULK_CREATE, Hook.AFTER_DESTROY];
@@ -77,6 +96,7 @@ const hooks = [Hook.AFTER_CREATE, Hook.AFTER_UPDATE, Hook.AFTER_BULK_CREATE, Hoo
 const hooksNotSupported = [Hook.AFTER_UPSERT, Hook.AFTER_BULK_DESTROY, Hook.AFTER_BULK_UPDATE];
 
 const attrsToClone = ['type', 'field'];
+
 
 function getVersionType(hook){
     switch (hook){
@@ -104,29 +124,15 @@ function Version(model, customOptions) {
     
     const versionModelName = `${capitalize(prefix)}${capitalize(model.name)}`;
     
-    const versionFieldId = `${attributePrefix}_id`;
-    const versionFieldType = `${attributePrefix}_type`;
-    const versionFieldTimestamp = `${attributePrefix}_timestamp`;
-
-    const versionAttrs = {
-        [versionFieldId]: {
-            type: Sequelize.BIGINT,
-            primaryKey: true,
-            autoIncrement: true,
-        },
-        [versionFieldType]: {
-            type: Sequelize.INTEGER,
-            allowNull: false,
-        },
-        [versionFieldTimestamp]: {
-            type: Sequelize.DATE,
-            allowNull: false,
-        },
-    }
-
+    const versionAttrs = typeof options.versionAttributes === 'function' ? options.versionAttributes(options) : options.versionAttributes;
+   
     const cloneModelAttrs = cloneAttrs(model, attrsToClone, excludeAttrs);
     const versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
     const tableName = `${prefix}_${model.options.tableName || model.name}${suffix ? `_${suffix}`:''}`;
+
+    const versionFieldId = `${attributePrefix}_id`;
+    const versionFieldType = `${attributePrefix}_type`;
+    const versionFieldTimestamp = `${attributePrefix}_timestamp`;
 
     const versionModelOptions = {
         schema,

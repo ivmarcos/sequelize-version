@@ -1,6 +1,6 @@
 {
   "name": "sequelize-version",
-  "version": "0.0.52",
+  "version": "0.0.53",
   "description": "Automatically version (audit, log) your sequelize models",
   "main": "index.js",
   "keywords": [
@@ -17,7 +17,8 @@
     "preversion": "yarn test",
     "version": "git add --all",
     "release": "yarn version --new-version patch",
-    "postversion": "git push"
+    "postversion": "git push",
+    "publish": "npm run publish"
   },
   "repository": {
     "type": "git",
@@ -36,6 +37,7 @@
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
     "continuation-local-storage": "^3.2.0",
+    "dotenv": "^4.0.0",
     "eslint": "^4.3.0",
     "mocha": "^3.5.0",
     "pg": "6.1.5",

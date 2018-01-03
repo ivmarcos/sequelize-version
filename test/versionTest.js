@@ -1,3 +1,4 @@
+require('dotenv').config();
 const assert = require('assert');
 const Version = require('../index');
 const Sequelize = require('sequelize');

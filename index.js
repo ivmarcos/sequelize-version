@@ -46,6 +46,23 @@ function cloneAttrs(model, attrs, excludeAttrs) {
     return clone;
 }
 
+function versionAttributes(options) {
+    var _ref;
+
+    var attributePrefix = options.attributePrefix || options.prefix;
+    return _ref = {}, _defineProperty(_ref, attributePrefix + '_id', {
+        type: Sequelize.BIGINT,
+        primaryKey: true,
+        autoIncrement: true
+    }), _defineProperty(_ref, attributePrefix + '_type', {
+        type: Sequelize.INTEGER,
+        allowNull: false
+    }), _defineProperty(_ref, attributePrefix + '_timestamp', {
+        type: Sequelize.DATE,
+        allowNull: false
+    }), _ref;
+}
+
 var VersionType = {
     CREATED: 1,
     UPDATED: 2,
@@ -70,7 +87,8 @@ var defaults = {
     schema: '',
     namespace: null,
     sequelize: null,
-    exclude: []
+    exclude: [],
+    versionAttributes: versionAttributes
 };
 
 var hooks = [Hook.AFTER_CREATE, Hook.AFTER_UPDATE, Hook.AFTER_BULK_CREATE, Hook.AFTER_DESTROY];
@@ -92,7 +110,6 @@ function getVersionType(hook) {
 }
 
 function Version(model, customOptions) {
-    var _versionAttrs;
 
     var options = Object.assign({}, defaults, Version.defaults, customOptions);
 
@@ -106,25 +123,15 @@ function Version(model, customOptions) {
 
     var versionModelName = '' + capitalize(prefix) + capitalize(model.name);
 
-    var versionFieldId = attributePrefix + '_id';
-    var versionFieldType = attributePrefix + '_type';
-    var versionFieldTimestamp = attributePrefix + '_timestamp';
-
-    var versionAttrs = (_versionAttrs = {}, _defineProperty(_versionAttrs, versionFieldId, {
-        type: Sequelize.BIGINT,
-        primaryKey: true,
-        autoIncrement: true
-    }), _defineProperty(_versionAttrs, versionFieldType, {
-        type: Sequelize.INTEGER,
-        allowNull: false
-    }), _defineProperty(_versionAttrs, versionFieldTimestamp, {
-        type: Sequelize.DATE,
-        allowNull: false
-    }), _versionAttrs);
+    var versionAttrs = typeof options.versionAttributes === 'function' ? options.versionAttributes(options) : options.versionAttributes;
 
     var cloneModelAttrs = cloneAttrs(model, attrsToClone, excludeAttrs);
     var versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
     var tableName = prefix + '_' + (model.options.tableName || model.name) + (suffix ? '_' + suffix : '');
+
+    var versionFieldId = attributePrefix + '_id';
+    var versionFieldType = attributePrefix + '_type';
+    var versionFieldTimestamp = attributePrefix + '_timestamp';
 
     var versionModelOptions = {
         schema: schema,
@@ -136,8 +143,8 @@ function Version(model, customOptions) {
 
     hooks.forEach(function (hook) {
 
-        model.addHook(hook, function (instanceData, _ref) {
-            var transaction = _ref.transaction;
+        model.addHook(hook, function (instanceData, _ref2) {
+            var transaction = _ref2.transaction;
 
 
             var cls = namespace || Sequelize.cls;
