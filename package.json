@@ -17,8 +17,7 @@
     "preversion": "yarn test",
     "version": "git add --all",
     "release": "yarn version --new-version patch",
-    "postversion": "git push",
-    "publish": "npm run publish"
+    "postversion": "git push"
   },
   "repository": {
     "type": "git",
