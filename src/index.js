@@ -40,7 +40,8 @@ function cloneAttrs(model, attrs, excludeAttrs){
 
 }
 
-function versionAttributes({atributePrefix}){
+function versionAttributes(options){
+    const attributePrefix = options.attributePrefix || options.prefix;
     return {
         [`${attributePrefix}_id`]: {
             type: Sequelize.BIGINT,
@@ -86,6 +87,7 @@ const hooks = [Hook.AFTER_CREATE, Hook.AFTER_UPDATE, Hook.AFTER_BULK_CREATE, Hoo
 
 const attrsToClone = ['type', 'field'];
 
+
 function getVersionType(hook){
     switch (hook){
     case Hook.AFTER_CREATE: case Hook.AFTER_BULK_CREATE:
@@ -112,7 +114,7 @@ function Version(model, customOptions) {
     
     const versionModelName = `${capitalize(prefix)}${capitalize(model.name)}`;
     
-    const versionAttrs = options.versionAttributes(options);
+    const versionAttrs = typeof options.versionAttributes === 'function' ? options.versionAttributes(options) : options.versionAttributes;
    
     const cloneModelAttrs = cloneAttrs(model, attrsToClone, excludeAttrs);
     const versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
