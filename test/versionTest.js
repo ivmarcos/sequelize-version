@@ -5,14 +5,11 @@ const Sequelize = require('sequelize');
 const cls = require('continuation-local-storage');
 const namespace = cls.createNamespace('my-very-own-namespace');
 const env = process.env;
-const consoleWarnQueues = [];
+const warnings = [];
 
-function wrapConsoleWarn(){
-    console.warn = function(message){
-        consoleWarnQueues.push(message);
-        console.log.apply(console, arguments);
-    }
-}
+process.on('warning', warning => {
+    warnings.push(warning);
+})
 
 function useCLS(Sequelize, namespace){
     if (Sequelize.useCLS){
@@ -513,29 +510,22 @@ describe('sequelize-version', () => {
 
     });
 
-    it('Must warn when using methods not supported', done => {
+    it.only('Must warn when using methods not supported', async done => {
 
-       const test = async() => {
-
-            try{
+         try{
                 
-                const testInstance = await TestModel.build({name: 'test with getVersions'}).save();
-
-                const testInstance2 = await TestModel.upsert({id: 2, name: 'test2'});
-              
-                return ;
-
-            }catch(err){
-
-                return err;
-            }
-
-        }
-
-        test.then(() => {
-            assert.equal(1, consoleWarnQueues.length);
+            const testInstance = await TestModel.build({name: 'test with getVersions'}).save();
+            const testInstance2 = await TestModel.upsert({id: 2, name: 'test2'});
+            
+            assert.equal(1, warnings.length);
+            console.log('warnings', warnings.join('\n'))
             done();
-        }).catch(err = done(err));
+
+        }catch(err){
+
+            done(err)
+        }
+     
 
     })
    

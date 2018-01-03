@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 
 function warn(text){
-    console.warn(`Warning: ${text}`)
+    process.emitWarning(text)
 }
 
 function capitalize(string){
@@ -25,9 +25,7 @@ function cloneAttrs(model, attrs, excludeAttrs){
     for (let p in attributes){
 
         if (excludeAttrs.indexOf(p) > -1) continue;
-
         let nestedClone = {};
-        
         const attribute = attributes[p];
 
         for (let np in attribute){

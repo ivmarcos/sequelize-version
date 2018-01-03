@@ -5,7 +5,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 var Sequelize = require('sequelize');
 
 function warn(text) {
-    console.warn('Warning: ' + text);
+    process.emitWarning(text);
 }
 
 function capitalize(string) {
