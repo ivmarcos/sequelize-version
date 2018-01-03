@@ -170,7 +170,8 @@ function Version(model, customOptions) {
 
     hooksNotSupported.forEach(hook => {
 
-        model.addHook(hook, () => {
+        model.addHook(hook, (options) => {
+            console.log('options', options)
             warn(`When you use the sequelize ${hook} method, instance changes cannot be tracked by sequelize-version.`)
         });
 

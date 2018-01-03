@@ -517,7 +517,7 @@ describe('sequelize-version', () => {
             const testInstance = await TestModel.build({name: 'test with getVersions'}).save();
             const testInstance2 = await TestModel.upsert({id: 2, name: 'test2'});
             
-            assert.equal(1, warnings.length);
+            assert.equal(2, warnings.length);
             console.log('warnings', warnings.join('\n'))
             done();
 

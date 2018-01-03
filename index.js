@@ -29,9 +29,7 @@ function cloneAttrs(model, attrs, excludeAttrs) {
     for (var p in attributes) {
 
         if (excludeAttrs.indexOf(p) > -1) continue;
-
         var nestedClone = {};
-
         var attribute = attributes[p];
 
         for (var np in attribute) {
@@ -173,7 +171,8 @@ function Version(model, customOptions) {
 
     hooksNotSupported.forEach(function (hook) {
 
-        model.addHook(hook, function () {
+        model.addHook(hook, function (options) {
+            console.log('options', options);
             warn('When you use the sequelize ' + hook + ' method, instance changes cannot be tracked by sequelize-version.');
         });
     });
