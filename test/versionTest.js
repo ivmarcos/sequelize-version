@@ -209,7 +209,7 @@ describe('sequelize-version', () => {
   });
 
 
-  it ('must support custom options', done => {
+  it('must support custom options', done => {
     const sequelize2 = new Sequelize(env.DB_TEST, env.DB_USER, env.DB_PWD, {
       logging: console.log,
       dialect: 'postgres',
@@ -281,7 +281,7 @@ describe('sequelize-version', () => {
     }).catch(err => done(err));
   });
 
-  it ('must support global options', done => {
+  it('must support global options', done => {
     const sequelize2 = new Sequelize(env.DB_TEST, env.DB_USER, env.DB_PWD, {
       logging: console.log,
       dialect: 'postgres',
@@ -350,7 +350,7 @@ describe('sequelize-version', () => {
     }).catch(err => done(err));
   });
 
-  it ('version scopes must be working', done => {
+  it('version scopes must be working', done => {
     const test = async() => {
       try{
         const testInstance = await TestModel.build({ name: 'test', json: { test: { nested: true } } }).save();
@@ -395,7 +395,7 @@ describe('sequelize-version', () => {
     }).catch(err => done(err));
   });
 
-  it ('getVersions function instance and class methods', done => {
+  it('getVersions function instance and class methods', done => {
     const test = async() => {
       try{
         const testInstance = await TestModel.build({ name: 'test with getVersions', json: { test: { nested: true } } }).save();
@@ -433,5 +433,23 @@ describe('sequelize-version', () => {
 
       done();
     }).catch(err => done(err));
+  });
+
+  it('must validate correctly the options', done => {
+    const incorrectOptions = {
+      prefix: '',
+      suffix: '',
+    };
+    assert.throws(() => {
+      new Version(TestModel, incorrectOptions);
+    });
+    const incorrectOptions2 = {
+      prefix: null,
+      suffix: '',
+    };
+    assert.throws(() => {
+      new Version(TestModel, incorrectOptions2);
+    });
+    done();
   });
 });

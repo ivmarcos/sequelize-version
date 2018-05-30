@@ -53,7 +53,7 @@ let person = await Person.build({name: 'Jack'}).save();
 person.name = 'Jack Johnson';
 
 // update 
-person = await person.save();
+await person.save();
 
 // and delete
 await person.destroy();

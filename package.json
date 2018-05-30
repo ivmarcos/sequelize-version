@@ -7,7 +7,8 @@
     "sequelize",
     "version",
     "audit",
-    "log"
+    "log",
+    "history"
   ],
   "scripts": {
     "pretest": "yarn build",

@@ -61,6 +61,7 @@ const Hook = {
   AFTER_SAVE: 'afterSave',
   AFTER_BULK_CREATE: 'afterBulkCreate',
 };
+
 const defaults = {
   prefix: 'version',
   attributePrefix: '',
@@ -72,10 +73,13 @@ const defaults = {
   versionAttributes,
 };
 
+function isEmpty(string){
+  return [undefined, null, NaN, ''].indexOf(string) > -1;
+}
+
 const hooks = [Hook.AFTER_CREATE, Hook.AFTER_UPDATE, Hook.AFTER_BULK_CREATE, Hook.AFTER_DESTROY];
 
 const attrsToClone = ['type', 'field', 'get', 'set'];
-
 
 function getVersionType(hook){
   switch (hook){
@@ -92,11 +96,18 @@ function getVersionType(hook){
 function Version(model, customOptions) {
   const options = Object.assign({}, defaults, Version.defaults, customOptions);
 
-  const prefix = options.prefix;
-  const suffix = options.suffix;
+  const {
+    prefix,
+    suffix,
+    namespace,
+    exclude,
+  } = options;
+
+  if (isEmpty(prefix) && isEmpty(suffix)){
+    throw new Error('Prefix or suffix must be informed in options.');
+  }
+
   const sequelize = options.sequelize || model.sequelize;
-  const namespace = options.namespace;
-  const excludeAttrs = options.exclude;
   const schema = options.schema || model.options.schema;
   const attributePrefix = options.attributePrefix || options.prefix;
 
@@ -104,9 +115,10 @@ function Version(model, customOptions) {
 
   const versionAttrs = typeof options.versionAttributes === 'function' ? options.versionAttributes(options) : options.versionAttributes;
 
-  const cloneModelAttrs = cloneAttrs(model, attrsToClone, excludeAttrs);
+  const cloneModelAttrs = cloneAttrs(model, attrsToClone, exclude);
   const versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
-  const tableName = `${prefix}_${model.options.tableName || model.name}${suffix ? `_${suffix}`:''}`;
+  
+  const tableName = `${prefix ? `${prefix}_` : ''}${model.options.tableName || model.name}${suffix ? `_${suffix}`:''}`;
 
   const versionFieldType = `${attributePrefix}_type`;
   const versionFieldTimestamp = `${attributePrefix}_timestamp`;
@@ -192,7 +204,7 @@ function Version(model, customOptions) {
 }
 
 
-Version.defaults = defaults;
+Version.defaults = Object.assign({}, defaults);
 Version.VersionType = VersionType;
 
 module.exports = Version;
