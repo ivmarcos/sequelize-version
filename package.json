@@ -39,9 +39,11 @@
     "continuation-local-storage": "^3.2.0",
     "dotenv": "^4.0.0",
     "eslint": "^4.3.0",
-    "mocha": "^3.5.0",
-    "pg": "6.1.5",
-    "sequelize": "^4.4.2"
+    "mocha": "^5.2.0",
+    "pg": "^7.4.3",
+    "sequelize": "*"
   },
-  "dependencies": {}
+  "peerDependencies": {
+    "sequelize": ">= 3.x <= 4.x"
+  }
 }
