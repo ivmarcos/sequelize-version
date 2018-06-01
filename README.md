@@ -7,7 +7,7 @@ querying, see the changes made, or whatever you want. The version model uses seq
 ## Installation
 
 ```shell
-npm i sequelize-version
+npm i sequelize-version --save
 ```
 or
 ```shell
