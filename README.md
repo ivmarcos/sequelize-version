@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ivmarcos/sequelize-version.svg?branch=master)](https://travis-ci.org/ivmarcos/sequelize-version)
+[![Build Status](https://travis-ci.org/ivmarcos/sequelize-version.svg?branch=master)](https://travis-ci.org/ivmarcos/sequelize-version) [![Greenkeeper badge](https://badges.greenkeeper.io/ivmarcos/sequelize-version.svg)](https://greenkeeper.io/)
 
 # sequelize-version
 Automatically version (audit, log) your sequelize models, tracking all the changes (create, update, delete) by generating a version of the model than can be used for easy
