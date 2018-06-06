@@ -18,7 +18,14 @@
     "preversion": "yarn test",
     "version": "git add --all",
     "release": "yarn version --new-version patch",
-    "postversion": "git push"
+    "postversion": "git push",
+    "precommit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{css,md,js,json}": [
+      "prettier-eslint --write",
+      "git add"
+    ]
   },
   "repository": {
     "type": "git",
@@ -39,8 +46,11 @@
     "continuation-local-storage": "^3.2.0",
     "dotenv": "^5.0.1",
     "eslint": "^4.3.0",
+    "husky": "^0.14.3",
+    "lint-staged": "^7.1.3",
     "mocha": "^5.2.0",
     "pg": "^7.4.3",
+    "prettier-eslint-cli": "^4.7.1",
     "sequelize": "*"
   },
   "peerDependencies": {
