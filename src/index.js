@@ -70,6 +70,8 @@ const defaults = {
   namespace: null,
   sequelize: null,
   exclude: [],
+  tableUnderscored: true,
+  underscored: true, // False by default for Sequelize, but true here to not break Backwards Compatibility
   versionAttributes,
 };
 
@@ -101,6 +103,8 @@ function Version(model, customOptions) {
     suffix,
     namespace,
     exclude,
+    tableUnderscored,
+    underscored,
   } = options;
 
   if (isEmpty(prefix) && isEmpty(suffix)){
@@ -117,11 +121,11 @@ function Version(model, customOptions) {
 
   const cloneModelAttrs = cloneAttrs(model, attrsToClone, exclude);
   const versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
-  
-  const tableName = `${prefix ? `${prefix}_` : ''}${model.options.tableName || model.name}${suffix ? `_${suffix}`:''}`;
 
-  const versionFieldType = `${attributePrefix}_type`;
-  const versionFieldTimestamp = `${attributePrefix}_timestamp`;
+  const tableName = `${prefix ? `${prefix}${tableUnderscored ? '_' : ''}` : ''}${model.options.tableName || model.name}${suffix ? `${tableUnderscored ? '_' : ''}${suffix}` : ''}`;
+
+  const versionFieldType = `${attributePrefix}${underscored ? '_t' : 'T'}ype`;
+  const versionFieldTimestamp = `${attributePrefix}${underscored ? '_t' : 'T'}imestamp`;
 
   const versionModelOptions = {
     schema,
@@ -176,7 +180,7 @@ function Version(model, customOptions) {
     return versionModel.findAll(versionParams);
   }
 
-  // Sequelize V4 
+  // Sequelize V4
   if (model.prototype){
     if (!model.prototype.hasOwnProperty('getVersions')){
       model.prototype.getVersions = getVersions;
