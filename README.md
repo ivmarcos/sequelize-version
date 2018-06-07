@@ -117,7 +117,13 @@ const customOptions = {
     sequelize: new Sequelize(...), 
 
     //attributes to ignore from origin model
-    exclude: ['createdAt', 'updatedAt'] 
+    exclude: ['createdAt', 'updatedAt'],
+
+    //table name with underscore, true as default
+    tableUnderscored: true,
+
+    //attributes with underscore, true as default
+    underscore: true,
 
 }
 
