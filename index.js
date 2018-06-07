@@ -1,6 +1,6 @@
+'use strict';
 
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 var Sequelize = require('sequelize');
 
@@ -36,7 +36,7 @@ function cloneAttrs(model, attrs, excludeAttrs) {
 var VersionType = {
   CREATED: 1,
   UPDATED: 2,
-  DELETED: 3,
+  DELETED: 3
 };
 
 var Hook = {
@@ -44,7 +44,7 @@ var Hook = {
   AFTER_UPDATE: 'afterUpdate',
   AFTER_DESTROY: 'afterDestroy',
   AFTER_SAVE: 'afterSave',
-  AFTER_BULK_CREATE: 'afterBulkCreate',
+  AFTER_BULK_CREATE: 'afterBulkCreate'
 };
 
 var defaults = {
@@ -57,7 +57,7 @@ var defaults = {
   exclude: [],
   tableUnderscored: true,
   underscored: true,
-  versionAttributes: null,
+  versionAttributes: null
 };
 
 function isEmpty(string) {
@@ -70,12 +70,12 @@ var attrsToClone = ['type', 'field', 'get', 'set'];
 
 function getVersionType(hook) {
   switch (hook) {
-  case Hook.AFTER_CREATE:case Hook.AFTER_BULK_CREATE:
-    return VersionType.CREATED;
-  case Hook.AFTER_UPDATE:
-    return VersionType.UPDATED;
-  case Hook.AFTER_DESTROY:
-    return VersionType.DELETED;
+    case Hook.AFTER_CREATE:case Hook.AFTER_BULK_CREATE:
+      return VersionType.CREATED;
+    case Hook.AFTER_UPDATE:
+      return VersionType.UPDATED;
+    case Hook.AFTER_DESTROY:
+      return VersionType.DELETED;
   }
   throw new Error('Version type not found for hook ' + hook);
 }
@@ -86,11 +86,11 @@ function Version(model, customOptions) {
   var options = Object.assign({}, defaults, Version.defaults, customOptions);
 
   var prefix = options.prefix,
-    suffix = options.suffix,
-    namespace = options.namespace,
-    exclude = options.exclude,
-    tableUnderscored = options.tableUnderscored,
-    underscored = options.underscored;
+      suffix = options.suffix,
+      namespace = options.namespace,
+      exclude = options.exclude,
+      tableUnderscored = options.tableUnderscored,
+      underscored = options.underscored;
 
 
   if (isEmpty(prefix) && isEmpty(suffix)) {
@@ -108,22 +108,22 @@ function Version(model, customOptions) {
   var versionAttrs = (_versionAttrs = {}, _defineProperty(_versionAttrs, versionFieldId, {
     type: Sequelize.BIGINT,
     primaryKey: true,
-    autoIncrement: true,
+    autoIncrement: true
   }), _defineProperty(_versionAttrs, versionFieldType, {
     type: Sequelize.INTEGER,
-    allowNull: false,
+    allowNull: false
   }), _defineProperty(_versionAttrs, versionFieldTimestamp, {
     type: Sequelize.DATE,
-    allowNull: false,
+    allowNull: false
   }), _versionAttrs);
 
   var cloneModelAttrs = cloneAttrs(model, attrsToClone, exclude);
   var versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
 
   var versionModelOptions = {
-    schema,
-    tableName,
-    timestamps: false,
+    schema: schema,
+    tableName: tableName,
+    timestamps: false
   };
 
   var versionModel = sequelize.define(versionModelName, versionModelAttrs, versionModelOptions);
