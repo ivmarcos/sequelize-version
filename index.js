@@ -1,6 +1,6 @@
-'use strict';
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 var Sequelize = require('sequelize');
 
@@ -33,27 +33,10 @@ function cloneAttrs(model, attrs, excludeAttrs) {
   return clone;
 }
 
-function versionAttributes(options) {
-  var _ref;
-
-  var attributePrefix = options.attributePrefix || options.prefix;
-  return _ref = {}, _defineProperty(_ref, attributePrefix + '_id', {
-    type: Sequelize.BIGINT,
-    primaryKey: true,
-    autoIncrement: true
-  }), _defineProperty(_ref, attributePrefix + '_type', {
-    type: Sequelize.INTEGER,
-    allowNull: false
-  }), _defineProperty(_ref, attributePrefix + '_timestamp', {
-    type: Sequelize.DATE,
-    allowNull: false
-  }), _ref;
-}
-
 var VersionType = {
   CREATED: 1,
   UPDATED: 2,
-  DELETED: 3
+  DELETED: 3,
 };
 
 var Hook = {
@@ -61,7 +44,7 @@ var Hook = {
   AFTER_UPDATE: 'afterUpdate',
   AFTER_DESTROY: 'afterDestroy',
   AFTER_SAVE: 'afterSave',
-  AFTER_BULK_CREATE: 'afterBulkCreate'
+  AFTER_BULK_CREATE: 'afterBulkCreate',
 };
 
 var defaults = {
@@ -73,8 +56,8 @@ var defaults = {
   sequelize: null,
   exclude: [],
   tableUnderscored: true,
-  underscored: true, // False by default for Sequelize, but true here to not break Backwards Compatibility
-  versionAttributes: versionAttributes
+  underscored: true,
+  versionAttributes: null,
 };
 
 function isEmpty(string) {
@@ -87,25 +70,27 @@ var attrsToClone = ['type', 'field', 'get', 'set'];
 
 function getVersionType(hook) {
   switch (hook) {
-    case Hook.AFTER_CREATE:case Hook.AFTER_BULK_CREATE:
-      return VersionType.CREATED;
-    case Hook.AFTER_UPDATE:
-      return VersionType.UPDATED;
-    case Hook.AFTER_DESTROY:
-      return VersionType.DELETED;
+  case Hook.AFTER_CREATE:case Hook.AFTER_BULK_CREATE:
+    return VersionType.CREATED;
+  case Hook.AFTER_UPDATE:
+    return VersionType.UPDATED;
+  case Hook.AFTER_DESTROY:
+    return VersionType.DELETED;
   }
   throw new Error('Version type not found for hook ' + hook);
 }
 
 function Version(model, customOptions) {
+  var _versionAttrs;
+
   var options = Object.assign({}, defaults, Version.defaults, customOptions);
 
   var prefix = options.prefix,
-      suffix = options.suffix,
-      namespace = options.namespace,
-      exclude = options.exclude,
-      tableUnderscored = options.tableUnderscored,
-      underscored = options.underscored;
+    suffix = options.suffix,
+    namespace = options.namespace,
+    exclude = options.exclude,
+    tableUnderscored = options.tableUnderscored,
+    underscored = options.underscored;
 
 
   if (isEmpty(prefix) && isEmpty(suffix)) {
@@ -115,30 +100,37 @@ function Version(model, customOptions) {
   var sequelize = options.sequelize || model.sequelize;
   var schema = options.schema || model.options.schema;
   var attributePrefix = options.attributePrefix || options.prefix;
-
+  var tableName = '' + (prefix ? '' + prefix + (tableUnderscored ? '_' : '') : '') + (model.options.tableName || model.name) + (suffix ? '' + (tableUnderscored ? '_' : '') + suffix : '');
+  var versionFieldType = '' + attributePrefix + (underscored ? '_t' : 'T') + 'ype';
+  var versionFieldId = '' + attributePrefix + (underscored ? '_i' : 'I') + 'd';
+  var versionFieldTimestamp = '' + attributePrefix + (underscored ? '_t' : 'T') + 'imestamp';
   var versionModelName = '' + capitalize(prefix) + capitalize(model.name);
-
-  var versionAttrs = typeof options.versionAttributes === 'function' ? options.versionAttributes(options) : options.versionAttributes;
+  var versionAttrs = (_versionAttrs = {}, _defineProperty(_versionAttrs, versionFieldId, {
+    type: Sequelize.BIGINT,
+    primaryKey: true,
+    autoIncrement: true,
+  }), _defineProperty(_versionAttrs, versionFieldType, {
+    type: Sequelize.INTEGER,
+    allowNull: false,
+  }), _defineProperty(_versionAttrs, versionFieldTimestamp, {
+    type: Sequelize.DATE,
+    allowNull: false,
+  }), _versionAttrs);
 
   var cloneModelAttrs = cloneAttrs(model, attrsToClone, exclude);
   var versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
 
-  var tableName = '' + (prefix ? '' + prefix + (tableUnderscored ? '_' : '') : '') + (model.options.tableName || model.name) + (suffix ? '' + (tableUnderscored ? '_' : '') + suffix : '');
-
-  var versionFieldType = '' + attributePrefix + (underscored ? '_t' : 'T') + 'ype';
-  var versionFieldTimestamp = '' + attributePrefix + (underscored ? '_t' : 'T') + 'imestamp';
-
   var versionModelOptions = {
-    schema: schema,
-    tableName: tableName,
-    timestamps: false
+    schema,
+    tableName,
+    timestamps: false,
   };
 
   var versionModel = sequelize.define(versionModelName, versionModelAttrs, versionModelOptions);
 
   hooks.forEach(function (hook) {
-    model.addHook(hook, function (instanceData, _ref2) {
-      var transaction = _ref2.transaction;
+    model.addHook(hook, function (instanceData, _ref) {
+      var transaction = _ref.transaction;
 
       var cls = namespace || Sequelize.cls;
 
