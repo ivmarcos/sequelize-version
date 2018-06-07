@@ -33,14 +33,16 @@ const PersonVersion = new Version(Person);
 
 ## Options
 
-|Name            |Type               |Default       |Description
-|----------------|-------------------|--------------|--------------------------------
-|prefix          | `string`          | `'version'`  | Prefix for table name and version attributes
-|suffix          | `string`          |              | Table name suffix
-|attributePrefix | `string`          |              | Overrides prefix for version attribute fields
-|schema          | `string`          |              | Version model schema, uses origin model schema as default
-|sequelize       | `sequelize`       |              | Sequelize instance, uses origin model sequelize as default
-|exclude         | `Array<string>`   |              | Attributes to ignore 
+|Name             |Type               |Default       |Description
+|-----------------|-------------------|--------------|--------------------------------
+|prefix           | `string`          | `'version'`  | Prefix for table name and version attributes
+|suffix           | `string`          |              | Table name suffix
+|attributePrefix  | `string`          |              | Overrides prefix for version attribute fields
+|schema           | `string`          |              | Version model schema, uses origin model schema as default
+|sequelize        | `sequelize`       |              | Sequelize instance, uses origin model sequelize as default
+|exclude          | `Array<string>`   |              | Attributes to ignore 
+|tableUnderscored | `boolean`         |   `true`     | Use underscore in version table name
+|underscored      | `boolean`         |   `true`     | Use underscore in version attributes
 
 ## Examples
 

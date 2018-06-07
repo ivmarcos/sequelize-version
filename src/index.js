@@ -71,7 +71,7 @@ const defaults = {
   sequelize: null,
   exclude: [],
   tableUnderscored: true,
-  underscored: true, // False by default for Sequelize, but true here to not break Backwards Compatibility
+  underscored: true,
   versionAttributes,
 };
 
