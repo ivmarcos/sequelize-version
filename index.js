@@ -72,7 +72,7 @@ var defaults = {
   namespace: null,
   sequelize: null,
   exclude: [],
-  table_underscored: true,
+  tableUnderscored: true,
   underscored: true, // False by default for Sequelize, but true here to not break Backwards Compatibility
   versionAttributes: versionAttributes
 };
@@ -104,7 +104,7 @@ function Version(model, customOptions) {
       suffix = options.suffix,
       namespace = options.namespace,
       exclude = options.exclude,
-      table_underscored = options.table_underscored,
+      tableUnderscored = options.tableUnderscored,
       underscored = options.underscored;
 
 
@@ -123,7 +123,7 @@ function Version(model, customOptions) {
   var cloneModelAttrs = cloneAttrs(model, attrsToClone, exclude);
   var versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
 
-  var tableName = '' + (prefix ? '' + prefix + (table_underscored ? '_' : '') : '') + (model.options.tableName || model.name) + (suffix ? '' + (table_underscored ? '_' : '') + suffix : '');
+  var tableName = '' + (prefix ? '' + prefix + (tableUnderscored ? '_' : '') : '') + (model.options.tableName || model.name) + (suffix ? '' + (tableUnderscored ? '_' : '') + suffix : '');
 
   var versionFieldType = '' + attributePrefix + (underscored ? '_t' : 'T') + 'ype';
   var versionFieldTimestamp = '' + attributePrefix + (underscored ? '_t' : 'T') + 'imestamp';
