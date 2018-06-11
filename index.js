@@ -33,23 +33,6 @@ function cloneAttrs(model, attrs, excludeAttrs) {
   return clone;
 }
 
-function versionAttributes(options) {
-  var _ref;
-
-  var attributePrefix = options.attributePrefix || options.prefix;
-  return _ref = {}, _defineProperty(_ref, attributePrefix + '_id', {
-    type: Sequelize.BIGINT,
-    primaryKey: true,
-    autoIncrement: true
-  }), _defineProperty(_ref, attributePrefix + '_type', {
-    type: Sequelize.INTEGER,
-    allowNull: false
-  }), _defineProperty(_ref, attributePrefix + '_timestamp', {
-    type: Sequelize.DATE,
-    allowNull: false
-  }), _ref;
-}
-
 var VersionType = {
   CREATED: 1,
   UPDATED: 2,
@@ -72,7 +55,9 @@ var defaults = {
   namespace: null,
   sequelize: null,
   exclude: [],
-  versionAttributes: versionAttributes
+  tableUnderscored: true,
+  underscored: true,
+  versionAttributes: null
 };
 
 function isEmpty(string) {
@@ -96,12 +81,16 @@ function getVersionType(hook) {
 }
 
 function Version(model, customOptions) {
+  var _versionAttrs;
+
   var options = Object.assign({}, defaults, Version.defaults, customOptions);
 
   var prefix = options.prefix,
       suffix = options.suffix,
       namespace = options.namespace,
-      exclude = options.exclude;
+      exclude = options.exclude,
+      tableUnderscored = options.tableUnderscored,
+      underscored = options.underscored;
 
 
   if (isEmpty(prefix) && isEmpty(suffix)) {
@@ -111,18 +100,25 @@ function Version(model, customOptions) {
   var sequelize = options.sequelize || model.sequelize;
   var schema = options.schema || model.options.schema;
   var attributePrefix = options.attributePrefix || options.prefix;
-
+  var tableName = '' + (prefix ? '' + prefix + (tableUnderscored ? '_' : '') : '') + (model.options.tableName || model.name) + (suffix ? '' + (tableUnderscored ? '_' : '') + suffix : '');
+  var versionFieldType = '' + attributePrefix + (underscored ? '_t' : 'T') + 'ype';
+  var versionFieldId = '' + attributePrefix + (underscored ? '_i' : 'I') + 'd';
+  var versionFieldTimestamp = '' + attributePrefix + (underscored ? '_t' : 'T') + 'imestamp';
   var versionModelName = '' + capitalize(prefix) + capitalize(model.name);
-
-  var versionAttrs = typeof options.versionAttributes === 'function' ? options.versionAttributes(options) : options.versionAttributes;
+  var versionAttrs = (_versionAttrs = {}, _defineProperty(_versionAttrs, versionFieldId, {
+    type: Sequelize.BIGINT,
+    primaryKey: true,
+    autoIncrement: true
+  }), _defineProperty(_versionAttrs, versionFieldType, {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  }), _defineProperty(_versionAttrs, versionFieldTimestamp, {
+    type: Sequelize.DATE,
+    allowNull: false
+  }), _versionAttrs);
 
   var cloneModelAttrs = cloneAttrs(model, attrsToClone, exclude);
   var versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
-
-  var tableName = '' + (prefix ? prefix + '_' : '') + (model.options.tableName || model.name) + (suffix ? '_' + suffix : '');
-
-  var versionFieldType = attributePrefix + '_type';
-  var versionFieldTimestamp = attributePrefix + '_timestamp';
 
   var versionModelOptions = {
     schema: schema,
@@ -133,8 +129,8 @@ function Version(model, customOptions) {
   var versionModel = sequelize.define(versionModelName, versionModelAttrs, versionModelOptions);
 
   hooks.forEach(function (hook) {
-    model.addHook(hook, function (instanceData, _ref2) {
-      var transaction = _ref2.transaction;
+    model.addHook(hook, function (instanceData, _ref) {
+      var transaction = _ref.transaction;
 
       var cls = namespace || Sequelize.cls;
 
@@ -188,7 +184,7 @@ function Version(model, customOptions) {
     return versionModel.findAll(versionParams);
   }
 
-  // Sequelize V4 
+  // Sequelize V4
   if (model.prototype) {
     if (!model.prototype.hasOwnProperty('getVersions')) {
       model.prototype.getVersions = getVersions;

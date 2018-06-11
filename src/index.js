@@ -29,25 +29,6 @@ function cloneAttrs(model, attrs, excludeAttrs) {
   return clone;
 }
 
-function versionAttributes(options) {
-  const attributePrefix = options.attributePrefix || options.prefix;
-  return {
-    [`${attributePrefix}_id`]: {
-      type: Sequelize.BIGINT,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    [`${attributePrefix}_type`]: {
-      type: Sequelize.INTEGER,
-      allowNull: false,
-    },
-    [`${attributePrefix}_timestamp`]: {
-      type: Sequelize.DATE,
-      allowNull: false,
-    },
-  };
-}
-
 const VersionType = {
   CREATED: 1,
   UPDATED: 2,
@@ -70,7 +51,9 @@ const defaults = {
   namespace: null,
   sequelize: null,
   exclude: [],
-  versionAttributes,
+  tableUnderscored: true,
+  underscored: true,
+  versionAttributes: null,
 };
 
 function isEmpty(string) {
@@ -102,7 +85,14 @@ function getVersionType(hook) {
 function Version(model, customOptions) {
   const options = Object.assign({}, defaults, Version.defaults, customOptions);
 
-  const { prefix, suffix, namespace, exclude } = options;
+  const {
+    prefix,
+    suffix,
+    namespace,
+    exclude,
+    tableUnderscored,
+    underscored,
+  } = options;
 
   if (isEmpty(prefix) && isEmpty(suffix)) {
     throw new Error('Prefix or suffix must be informed in options.');
@@ -111,7 +101,10 @@ function Version(model, customOptions) {
   const sequelize = options.sequelize || model.sequelize;
   const schema = options.schema || model.options.schema;
   const attributePrefix = options.attributePrefix || options.prefix;
-
+  const tableName = `${prefix ? `${prefix}${tableUnderscored ? '_' : ''}` : ''}${model.options.tableName || model.name}${suffix ? `${tableUnderscored ? '_' : ''}${suffix}` : ''}`;
+  const versionFieldType = `${attributePrefix}${underscored ? '_t' : 'T'}ype`;
+  const versionFieldId = `${attributePrefix}${underscored ? '_i' : 'I'}d`;
+  const versionFieldTimestamp = `${attributePrefix}${underscored ? '_t' : 'T'}imestamp`;
   const versionModelName = `${capitalize(prefix)}${capitalize(model.name)}`;
 
   const versionAttrs =
@@ -127,6 +120,25 @@ function Version(model, customOptions) {
 
   const versionFieldType = `${attributePrefix}_type`;
   const versionFieldTimestamp = `${attributePrefix}_timestamp`;
+
+  const versionAttrs = {
+    [versionFieldId]: {
+      type: Sequelize.BIGINT,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    [versionFieldType]: {
+      type: Sequelize.INTEGER,
+      allowNull: false,
+    },
+    [versionFieldTimestamp]: {
+      type: Sequelize.DATE,
+      allowNull: false,
+    },
+  };
+
+  const cloneModelAttrs = cloneAttrs(model, attrsToClone, exclude);
+  const versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
 
   const versionModelOptions = {
     schema,

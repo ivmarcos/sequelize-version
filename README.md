@@ -1,5 +1,4 @@
-[![Build Status](https://travis-ci.org/ivmarcos/sequelize-version.svg?branch=master)](https://travis-ci.org/ivmarcos/sequelize-version) [![Greenkeeper badge](https://badges.greenkeeper.io/ivmarcos/sequelize-version.svg)](https://greenkeeper.io/)
-
+[![Build Status](https://travis-ci.org/ivmarcos/sequelize-version.svg?branch=master)](https://travis-ci.org/ivmarcos/sequelize-version)
 # sequelize-version
 Automatically version (audit, log) your sequelize models, tracking all the changes (create, update, delete) by generating a version of the model than can be used for easy
 querying, see the changes made, or whatever you want. The version model uses sequelize hooks to persist the data.
@@ -33,14 +32,16 @@ const PersonVersion = new Version(Person);
 
 ## Options
 
-|Name            |Type               |Default       |Description
-|----------------|-------------------|--------------|--------------------------------
-|prefix          | `string`          | `'version'`  | Prefix for table name and version attributes
-|suffix          | `string`          |              | Table name suffix
-|attributePrefix | `string`          |              | Overrides prefix for version attribute fields
-|schema          | `string`          |              | Version model schema, uses origin model schema as default
-|sequelize       | `sequelize`       |              | Sequelize instance, uses origin model sequelize as default
-|exclude         | `Array<string>`   |              | Attributes to ignore 
+|Name             |Type               |Default       |Description
+|-----------------|-------------------|--------------|--------------------------------
+|prefix           | `string`          | `'version'`  | Prefix for table name and version attributes
+|suffix           | `string`          |              | Table name suffix
+|attributePrefix  | `string`          |              | Overrides prefix for version attribute fields
+|schema           | `string`          |              | Version model schema, uses origin model schema as default
+|sequelize        | `sequelize`       |              | Sequelize instance, uses origin model sequelize as default
+|exclude          | `Array<string>`   |              | Attributes to ignore 
+|tableUnderscored | `boolean`         |   `true`     | Use underscore in version table name
+|underscored      | `boolean`         |   `true`     | Use underscore in version attributes
 
 ## Examples
 
@@ -116,7 +117,13 @@ const customOptions = {
     sequelize: new Sequelize(...), 
 
     //attributes to ignore from origin model
-    exclude: ['createdAt', 'updatedAt'] 
+    exclude: ['createdAt', 'updatedAt'],
+
+    //table name with underscore, true as default
+    tableUnderscored: true,
+
+    //attributes with underscore, true as default
+    underscore: true,
 
 }
 

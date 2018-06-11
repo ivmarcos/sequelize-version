@@ -210,7 +210,7 @@ describe('sequelize-version', () => {
 
 
   it('must support custom options', done => {
-    const sequelize2 = new Sequelize(env.DB_TEST, env.DB_USER, env.DB_PWD, {
+    const externalSequelize = new Sequelize(env.DB_TEST, env.DB_USER, env.DB_PWD, {
       logging: console.log,
       dialect: 'postgres',
     });
@@ -218,36 +218,59 @@ describe('sequelize-version', () => {
     useCLS(Sequelize, namespace);
 
     const customOptions = {
-      schema: 'test2',
+      schema: 'test_custom',
       prefix: 'audit',
       suffix: 'log',
       exclude: ['createdAt', 'updatedAt'],
       attributePrefix: 'revision',
       namespace,
-      sequelize: sequelize2,
+      sequelize: externalSequelize,
     };
 
-    const V2 = new Version(TestModel, customOptions);
+    const VersionModelWithCustomOptions = new Version(TestModel, customOptions);
 
-    assert.equal(V2.options.schema, customOptions.schema);
-    assert.equal(true, new RegExp(`^${customOptions.prefix}`).test(V2.options.tableName));
-    assert.equal(true, new RegExp(`${customOptions.suffix}$`).test(V2.options.tableName));
+    assert.equal(VersionModelWithCustomOptions.options.schema, customOptions.schema);
+    assert.equal(`${customOptions.prefix}_${TestModel.options.tableName || TestModel.name}_${customOptions.suffix}`, VersionModelWithCustomOptions.options.tableName);
 
-    const versionAttributes = Object.keys(V2.attributes).filter(attr => attr.match(new RegExp(`^${customOptions.attributePrefix}`)));
+    const versionAttributes = Object.keys(VersionModelWithCustomOptions.attributes).filter(attr => attr.match(new RegExp(`^${customOptions.attributePrefix}_`)));
 
     assert.equal(3, versionAttributes.length);
+
+    const customOptionsWithoutUnderscore = {
+      schema: 'test_nounderscore',
+      prefix: 'audit',
+      suffix: 'log',
+      exclude: ['createdAt', 'updatedAt'],
+      attributePrefix: 'revision',
+      namespace,
+      sequelize: externalSequelize,
+      tableUnderscored: false,
+      underscored: false,
+    };
+
+    const VersionModelWithoutUnderscore = new Version(TestModel, customOptionsWithoutUnderscore);
+
+    assert.equal(VersionModelWithoutUnderscore.options.schema, customOptionsWithoutUnderscore.schema);
+    assert.equal(`${customOptionsWithoutUnderscore.prefix}${TestModel.options.tableName || TestModel.name}${customOptionsWithoutUnderscore.suffix}`, VersionModelWithoutUnderscore.options.tableName);
+
+    const versionAttributesWithoutUnderscore = Object.keys(VersionModelWithoutUnderscore.attributes).filter(attr => attr.match(new RegExp(`^${customOptions.attributePrefix}_`)));
+
+    assert.equal(0, versionAttributesWithoutUnderscore.length);
 
     const test = async() => {
       try{
         await sequelize.query(`CREATE SCHEMA IF NOT EXISTS ${customOptions.schema}`);
+        await sequelize.query(`CREATE SCHEMA IF NOT EXISTS ${customOptionsWithoutUnderscore.schema}`);
 
-        await V2.sync({ force: true });
+        await VersionModelWithCustomOptions.sync({ force: true });
+        await VersionModelWithoutUnderscore.sync({ force: true });
 
         const testInstance = await TestModel.build({ name: 'test', json: { test: { nested: true } } }).save();
 
         return Promise.all([
           VersionModel.findAll({ where: { id: testInstance.id } }),
-          V2.findAll({ where: { id: testInstance.id } }),
+          VersionModelWithCustomOptions.findAll({ where: { id: testInstance.id } }),
+          VersionModelWithoutUnderscore.findAll({ where: { id: testInstance.id } }),
           Promise.resolve(testInstance),
         ]);
       }catch(err){
@@ -258,23 +281,30 @@ describe('sequelize-version', () => {
     test().then(result => {
       if (typeof result === 'error') return done(result);
 
+      console.log('result', result);
+
       const vs1 = result[0];
       const vs2 = result[1];
-      const testInstance = result[2];
+      const vs3 = result[2];
+      const testInstance = result[3];
 
       const attributes = Object.keys(TestModel.attributes);
-      const attributesVersion = Object.keys(V2.attributes);
+      const attributesVersionCustomOptions = Object.keys(VersionModelWithCustomOptions.attributes);
+      const attributesVersionWithoutUnderscore = Object.keys(VersionModelWithoutUnderscore.attributes);
 
       const attributesCloned = attributes.filter(attr => customOptions.exclude.indexOf(attr) === -1);
 
       assert.equal(attributesCloned.length, attributes.length - customOptions.exclude.length);
-      assert.equal(attributesVersion.length, attributes.length - customOptions.exclude.length + 3);
+      assert.equal(attributesVersionCustomOptions.length, attributes.length - customOptions.exclude.length + 3);
+      assert.equal(attributesVersionWithoutUnderscore.length, attributes.length - customOptionsWithoutUnderscore.exclude.length + 3);
       assert.equal(vs1.length, 1);
       assert.equal(vs2.length, 1);
+      assert.equal(vs3.length, 1);
 
       attributesCloned.forEach(attr => {
         assert.deepEqual(vs1[0][attr], testInstance[attr]);
         assert.deepEqual(vs2[0][attr], testInstance[attr]);
+        assert.deepEqual(vs3[0][attr], testInstance[attr]);
       });
 
       done();
@@ -282,7 +312,7 @@ describe('sequelize-version', () => {
   });
 
   it('must support global options', done => {
-    const sequelize2 = new Sequelize(env.DB_TEST, env.DB_USER, env.DB_PWD, {
+    const externalSequelize = new Sequelize(env.DB_TEST, env.DB_USER, env.DB_PWD, {
       logging: console.log,
       dialect: 'postgres',
     });
@@ -293,7 +323,7 @@ describe('sequelize-version', () => {
       suffix: 'log',
       exclude: ['createdAt', 'updatedAt'],
       attributePrefix: 'revision',
-      sequelize: sequelize2,
+      sequelize: externalSequelize,
     };
 
     Version.defaults = customOptions;
