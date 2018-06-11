@@ -101,25 +101,17 @@ function Version(model, customOptions) {
   const sequelize = options.sequelize || model.sequelize;
   const schema = options.schema || model.options.schema;
   const attributePrefix = options.attributePrefix || options.prefix;
-  const tableName = `${prefix ? `${prefix}${tableUnderscored ? '_' : ''}` : ''}${model.options.tableName || model.name}${suffix ? `${tableUnderscored ? '_' : ''}${suffix}` : ''}`;
+  const tableName = `${
+    prefix ? `${prefix}${tableUnderscored ? '_' : ''}` : ''
+  }${model.options.tableName || model.name}${
+    suffix ? `${tableUnderscored ? '_' : ''}${suffix}` : ''
+  }`;
   const versionFieldType = `${attributePrefix}${underscored ? '_t' : 'T'}ype`;
   const versionFieldId = `${attributePrefix}${underscored ? '_i' : 'I'}d`;
-  const versionFieldTimestamp = `${attributePrefix}${underscored ? '_t' : 'T'}imestamp`;
+  const versionFieldTimestamp = `${attributePrefix}${
+    underscored ? '_t' : 'T'
+  }imestamp`;
   const versionModelName = `${capitalize(prefix)}${capitalize(model.name)}`;
-
-  const versionAttrs =
-    typeof options.versionAttributes === 'function'
-      ? options.versionAttributes(options)
-      : options.versionAttributes;
-
-  const cloneModelAttrs = cloneAttrs(model, attrsToClone, exclude);
-  const versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
-
-  const tableName = `${prefix ? `${prefix}_` : ''}${model.options.tableName ||
-    model.name}${suffix ? `_${suffix}` : ''}`;
-
-  const versionFieldType = `${attributePrefix}_type`;
-  const versionFieldTimestamp = `${attributePrefix}_timestamp`;
 
   const versionAttrs = {
     [versionFieldId]: {
