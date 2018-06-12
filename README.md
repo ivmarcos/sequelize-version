@@ -123,7 +123,7 @@ const customOptions = {
     tableUnderscored: true,
 
     //attributes with underscore, true as default
-    underscore: true,
+    underscored: true,
 
 }
 
