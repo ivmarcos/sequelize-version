@@ -1,5 +1,3 @@
-
-
 function _defineProperty(obj, key, value) {
   if (key in obj) {
     Object.defineProperty(obj, key, {
@@ -30,7 +28,7 @@ function clone(value) {
 
 function cloneAttrs(model, attrs, excludeAttrs) {
   var clone = {};
-  var attributes = model.attributes;
+  var attributes = model.rawAttributes || model.attributes;
   for (var p in attributes) {
     if (excludeAttrs.indexOf(p) > -1) continue;
     var nestedClone = {};
@@ -215,8 +213,10 @@ function Version(model, customOptions) {
 
     var versionParams = {};
 
-    var primaryKeys = Object.keys(model.attributes).filter(function(attr) {
-      return model.attributes[attr].primaryKey;
+    var primaryKeys = Object.keys(
+      model.rawAttributes || model.attributes
+    ).filter(function(attr) {
+      return (model.rawAttributes || model.attributes)[attr].primaryKey;
     });
 
     if (primaryKeys.length) {
