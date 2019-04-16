@@ -188,11 +188,11 @@ function Version(model, customOptions) {
 
   function getVersions(params) {
     let versionParams = {};
-
+    const modelAttributes = model.rawAttributes || model.attributes;
     const primaryKeys = Object.keys(
-      model.rawAttributes || model.attributes
+      modelAttributes
     ).filter(
-      attr => (model.rawAttributes || model.attributes)[attr].primaryKey
+      attr => (modelAttributes)[attr].primaryKey
     );
 
     if (primaryKeys.length) {
@@ -214,13 +214,13 @@ function Version(model, customOptions) {
     return versionModel.findAll(versionParams);
   }
 
-  // Sequelize V4
+  // Sequelize V4 and above
   if (model.prototype) {
     if (!model.prototype.hasOwnProperty('getVersions')) {
       model.prototype.getVersions = getVersions;
     }
 
-    //Sequelize V3 and above
+    //Sequelize V3 and below
   } else {
     const hooksForBind = hooks.concat([Hook.AFTER_SAVE]);
 
