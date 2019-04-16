@@ -14,7 +14,7 @@ function clone(value) {
 
 function cloneAttrs(model, attrs, excludeAttrs) {
   const clone = {};
-  const attributes = model.attributes;
+  const attributes = model.rawAttributes || model.attributes;
   for (const p in attributes) {
     if (excludeAttrs.indexOf(p) > -1) continue;
     const nestedClone = {};
@@ -189,8 +189,10 @@ function Version(model, customOptions) {
   function getVersions(params) {
     let versionParams = {};
 
-    const primaryKeys = Object.keys(model.attributes).filter(
-      attr => model.attributes[attr].primaryKey
+    const primaryKeys = Object.keys(
+      model.rawAttributes || model.attributes
+    ).filter(
+      attr => (model.rawAttributes || model.attributes)[attr].primaryKey
     );
 
     if (primaryKeys.length) {

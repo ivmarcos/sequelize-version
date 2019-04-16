@@ -54,6 +54,6 @@
     "sequelize": "*"
   },
   "peerDependencies": {
-    "sequelize": ">= 3.x <= 4.x"
+    "sequelize": ">= 3.x <= 5.x"
   }
 }
