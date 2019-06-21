@@ -1,5 +1,3 @@
-
-
 function _defineProperty(obj, key, value) {
   if (key in obj) {
     Object.defineProperty(obj, key, {
@@ -70,6 +68,8 @@ var defaults = {
   tableUnderscored: true,
   underscored: true,
   versionAttributes: null,
+  associations: false,
+  associationConstraints: false,
 };
 
 function isEmpty(string) {
@@ -159,6 +159,20 @@ function Version(model, customOptions) {
     versionModelAttrs,
     versionModelOptions
   );
+
+  if (options.associations) {
+    Object.keys(model.associations).forEach(function(key) {
+      var association = model.associations[key];
+      console.log(Object.keys(association));
+      console.log(association.associationType);
+      versionModel[association.associationType.toString().toLowerCase()](
+        association.target,
+        Object.assign({}, association.options, {
+          constraints: options.associationConstraints,
+        })
+      );
+    });
+  }
 
   hooks.forEach(function(hook) {
     model.addHook(hook, function(instanceData, _ref) {
