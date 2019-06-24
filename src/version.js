@@ -1,4 +1,4 @@
-import sequelize from 'Sequelize';
+const Sequelize = require('sequelize');
 import * as utils from './utils';
 import { Hook, VersionType } from './types';
 
@@ -28,13 +28,13 @@ const attrsToClone = ['type', 'field', 'get', 'set'];
 
 function getVersionType(hook) {
   switch (hook) {
-    case Hook.AFTER_CREATE:
-    case Hook.AFTER_BULK_CREATE:
-      return VersionType.CREATED;
-    case Hook.AFTER_UPDATE:
-      return VersionType.UPDATED;
-    case Hook.AFTER_DESTROY:
-      return VersionType.DELETED;
+  case Hook.AFTER_CREATE:
+  case Hook.AFTER_BULK_CREATE:
+    return VersionType.CREATED;
+  case Hook.AFTER_UPDATE:
+    return VersionType.UPDATED;
+  case Hook.AFTER_DESTROY:
+    return VersionType.DELETED;
   }
   throw new Error('Version type not found for hook ' + hook);
 }
@@ -164,8 +164,7 @@ function normalizeOptions(model, options) {
       allowNull: false,
     },
   };
-  return {
-    ...options,
+  const build = {
     sequelize,
     schema,
     attributePrefix,
@@ -176,6 +175,7 @@ function normalizeOptions(model, options) {
     versionModelName,
     versionAttrs,
   };
+  return Object.assign({}, options, build);
 }
 
 function createVersionModel() {
@@ -215,16 +215,15 @@ function validateOptions(options) {
 
 function Version(model, customOptions) {
   validateOptions(customOptions);
-  const options = normalizeOptions({
-    ...defaults,
-    ...Version.defaults,
-    ...customOptions,
-  });
+  const options = normalizeOptions(
+    Object.assign({}, defaults, Version.defaults, customOptions)
+  );
   const versionModel = createVersionModel();
   if (options.associations) {
     cloneAssociations(model, versionModel, options);
   }
-  addHooks(model, versionMode, options);
+  addHooks(model, versionModel, options);
+  addScopes(versionModel, options.versionFieldType);
   addQueries(model);
   return versionModel;
 }
