@@ -2,12 +2,33 @@ function isEmpty(string) {
   return [undefined, null, NaN, ''].indexOf(string) > -1;
 }
 
-function toArray$1(value) {
+function capitalize(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function toArray(value) {
   return Array.isArray(value) ? value : [value];
 }
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
+}
+
+function cloneAttrs(model, attrs, excludeAttrs) {
+  var clone = {};
+  var attributes = model.attributes;
+  for (var p in attributes) {
+    if (excludeAttrs.indexOf(p) > -1) continue;
+    var nestedClone = {};
+    var attribute = attributes[p];
+    for (var np in attribute) {
+      if (attrs.indexOf(np) > -1) {
+        nestedClone[np] = attribute[np];
+      }
+    }
+    clone[p] = nestedClone;
+  }
+  return clone;
 }
 
 var VersionType = {
@@ -99,7 +120,7 @@ function getVersionType(hook) {
   throw new Error('Version type not found for hook ' + hook);
 }
 
-function addQueries(model) {
+function addQueries(model, versionModel) {
   function getVersions(params) {
     var _this = this;
 
@@ -188,7 +209,7 @@ function addHooks(model, versionModel, options) {
       }
 
       var versionType = getVersionType(hook);
-      var instancesData = toArray$1(instanceData);
+      var instancesData = toArray(instanceData);
 
       var versionData = instancesData.map(function(data) {
         var _Object$assign;
@@ -216,6 +237,11 @@ function addHooks(model, versionModel, options) {
 
 function normalizeOptions(model, options) {
   var _versionAttrs;
+
+  var prefix = options.prefix,
+    tableUnderscored = options.tableUnderscored,
+    underscored = options.underscored,
+    suffix = options.suffix;
 
   var sequelize = options.sequelize || model.sequelize;
   var schema = options.schema || model.options.schema;
@@ -260,16 +286,20 @@ function normalizeOptions(model, options) {
   return Object.assign({}, options, build);
 }
 
-function createVersionModel() {
-  var cloneModelAttrs = cloneAttrs(model, attrsToClone, exclude);
-  var versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
+function createVersionModel(model, options) {
+  var cloneModelAttrs = cloneAttrs(model, attrsToClone, options.exclude);
+  var versionModelAttrs = Object.assign(
+    {},
+    cloneModelAttrs,
+    options.versionAttrs
+  );
   var versionModelOptions = {
-    schema,
-    tableName,
+    schema: options.schema,
+    tableName: options.tableName,
     timestamps: false,
   };
-  var versionModel = sequelize.define(
-    versionModelName,
+  var versionModel = options.sequelize.define(
+    options.versionModelName,
     versionModelAttrs,
     versionModelOptions
   );
@@ -290,6 +320,7 @@ function cloneAssociations(model, versionModel, options) {
 }
 
 function validateOptions(options) {
+  if (!options) return true;
   if (isEmpty(options.prefix) && isEmpty(options.suffix)) {
     throw new Error('Prefix or suffix must be informed in options.');
   }
@@ -298,9 +329,10 @@ function validateOptions(options) {
 function Version(model, customOptions) {
   validateOptions(customOptions);
   var options = normalizeOptions(
+    model,
     Object.assign({}, defaults$$1, Version.defaults, customOptions)
   );
-  var versionModel = createVersionModel();
+  var versionModel = createVersionModel(model, options);
   if (options.associations) {
     cloneAssociations(model, versionModel, options);
   }

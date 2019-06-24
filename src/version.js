@@ -219,6 +219,7 @@ function cloneAssociations(model, versionModel, options) {
 }
 
 function validateOptions(options) {
+  if (!options) return true;
   if (utils.isEmpty(options.prefix) && utils.isEmpty(options.suffix)) {
     throw new Error('Prefix or suffix must be informed in options.');
   }
@@ -227,9 +228,10 @@ function validateOptions(options) {
 function Version(model, customOptions) {
   validateOptions(customOptions);
   const options = normalizeOptions(
+    model,
     Object.assign({}, defaults, Version.defaults, customOptions)
   );
-  const versionModel = createVersionModel();
+  const versionModel = createVersionModel(model, options);
   if (options.associations) {
     cloneAssociations(model, versionModel, options);
   }
