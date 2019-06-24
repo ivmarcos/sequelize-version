@@ -39,7 +39,7 @@ function getVersionType(hook) {
   throw new Error('Version type not found for hook ' + hook);
 }
 
-function addQueries(model) {
+function addQueries(model, versionModel) {
   function getVersions(params) {
     let versionParams = {};
 
@@ -77,7 +77,7 @@ function addQueries(model) {
 
     hooksForBind.forEach(hook => {
       model.addHook(hook, instance => {
-        const instances = toArray(instance);
+        const instances = utils.toArray(instance);
         instances.forEach(i => {
           if (!i.getVersions) i.getVersions = getVersions;
         });
@@ -135,6 +135,7 @@ function addHooks(model, versionModel, options) {
 }
 
 function normalizeOptions(model, options) {
+  const { prefix, tableUnderscored, underscored, suffix } = options;
   const sequelize = options.sequelize || model.sequelize;
   const schema = options.schema || model.options.schema;
   const attributePrefix = options.attributePrefix || options.prefix;
@@ -148,7 +149,9 @@ function normalizeOptions(model, options) {
   const versionFieldTimestamp = `${attributePrefix}${
     underscored ? '_t' : 'T'
   }imestamp`;
-  const versionModelName = `${capitalize(prefix)}${capitalize(model.name)}`;
+  const versionModelName = `${utils.capitalize(prefix)}${utils.capitalize(
+    model.name
+  )}`;
   const versionAttrs = {
     [versionFieldId]: {
       type: Sequelize.BIGINT,
@@ -178,16 +181,24 @@ function normalizeOptions(model, options) {
   return Object.assign({}, options, build);
 }
 
-function createVersionModel() {
-  const cloneModelAttrs = cloneAttrs(model, attrsToClone, exclude);
-  const versionModelAttrs = Object.assign({}, cloneModelAttrs, versionAttrs);
+function createVersionModel(model, options) {
+  const cloneModelAttrs = utils.cloneAttrs(
+    model,
+    attrsToClone,
+    options.exclude
+  );
+  const versionModelAttrs = Object.assign(
+    {},
+    cloneModelAttrs,
+    options.versionAttrs
+  );
   const versionModelOptions = {
-    schema,
-    tableName,
+    schema: options.schema,
+    tableName: options.tableName,
     timestamps: false,
   };
-  const versionModel = sequelize.define(
-    versionModelName,
+  const versionModel = options.sequelize.define(
+    options.versionModelName,
     versionModelAttrs,
     versionModelOptions
   );
