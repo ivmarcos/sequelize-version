@@ -165,6 +165,23 @@ const person = await Person.findById(1);
 const versionsForOnlyThisPerson = await person.getVersions({where: {name: {like: '%Johnson'}}});
 ```
 
+### Important Notes
+This lib uses sequelize hooks to be able to track the changes. When using class methods, it is necessary to use the ```individualHooks: true``` option to make this possible. In such cases, this can cause a dramatic reduction in performance. See more at: https://sequelize.org/master/manual/hooks.html.
+```js
+// This will select all records that are about to be deleted and emit `beforeDestroy` and `afterDestroy` on each instance.
+await Model.destroy({
+  where: { accessLevel: 0 },
+  individualHooks: true
+});
+
+// This will select all records that are about to be updated and emit `beforeUpdate` and `afterUpdate` on each instance.
+await Model.update({ username: 'Jack' }, {
+  where: { accessLevel: 0 },
+  individualHooks: true
+});
+
+```
+
 ## License
 
 The files included in this repository are licensed under the MIT license.
