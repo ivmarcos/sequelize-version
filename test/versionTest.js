@@ -291,6 +291,7 @@ describe('sequelize-version', () => {
       new Version(TestModel, customOptions)
     );
 
+    assert.equal(VersionModelWithCustomOptions.name, 'AuditTestLog');
     assert.equal(
       VersionModelWithCustomOptions.options.schema,
       customOptions.schema
