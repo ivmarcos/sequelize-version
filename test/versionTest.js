@@ -4,14 +4,21 @@ const Version = require('../index');
 const Sequelize = require('sequelize');
 const cls = require('continuation-local-storage');
 const namespace = cls.createNamespace('my-very-own-namespace');
+const sessionName = 'sequelize-test';
 const env = process.env;
 
-function useCLS(Sequelize, namespace) {
-  if (Sequelize.useCLS) {
-    Sequelize.useCLS(namespace);
-  } else {
-    Sequelize.cls = namespace;
-  }
+async function useCLS(Sequelize, namespace) {
+  const session = cls.getNamespace(sessionName);
+  return new Promise((resolve) => {
+    session.run(() => {
+      if (Sequelize.useCLS) {
+        Sequelize.useCLS(namespace);
+      } else {
+        Sequelize.cls = namespace;
+      }
+      resolve();
+    })
+  })
 }
 
 // sequelize 5 compat
@@ -233,8 +240,8 @@ describe('sequelize-version', () => {
       .catch(err => done(err));
   });
 
-  it('must support cls transaction', done => {
-    useCLS(Sequelize, namespace);
+  it('must support cls transaction', async done => {
+    await useCLS(Sequelize, namespace);
 
     const ERR_MSG = 'ROLLBACK_CLS_TEST';
 
@@ -264,7 +271,7 @@ describe('sequelize-version', () => {
       .catch(err => done(err));
   });
 
-  it('must support custom options', done => {
+  it('must support custom options', async done => {
     const externalSequelize = new Sequelize(
       env.DB_TEST,
       env.DB_USER,
@@ -275,7 +282,7 @@ describe('sequelize-version', () => {
       }
     );
 
-    useCLS(Sequelize, namespace);
+    await useCLS(Sequelize, namespace);
 
     const customOptions = {
       schema: 'test_custom',
@@ -298,7 +305,7 @@ describe('sequelize-version', () => {
     );
     assert.equal(
       `${customOptions.prefix}_${TestModel.options.tableName ||
-        TestModel.name}_${customOptions.suffix}`,
+      TestModel.name}_${customOptions.suffix}`,
       VersionModelWithCustomOptions.options.tableName
     );
 
@@ -332,7 +339,7 @@ describe('sequelize-version', () => {
     );
     assert.equal(
       `${customOptionsWithoutUnderscore.prefix}${TestModel.options.tableName ||
-        TestModel.name}${customOptionsWithoutUnderscore.suffix}`,
+      TestModel.name}${customOptionsWithoutUnderscore.suffix}`,
       VersionModelWithoutUnderscore.options.tableName
     );
 
