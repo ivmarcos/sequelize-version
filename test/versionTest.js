@@ -4,21 +4,17 @@ const Version = require('../index');
 const Sequelize = require('sequelize');
 const cls = require('continuation-local-storage');
 const namespace = cls.createNamespace('my-very-own-namespace');
-const sessionName = 'sequelize-test';
 const env = process.env;
 
-async function useCLS(Sequelize, namespace) {
-  const session = cls.getNamespace(sessionName);
+function useCLS(Sequelize, namespace) {
   return new Promise((resolve) => {
-    session.run(() => {
-      if (Sequelize.useCLS) {
-        Sequelize.useCLS(namespace);
-      } else {
-        Sequelize.cls = namespace;
-      }
-      resolve();
-    })
-  })
+    if (Sequelize.useCLS) {
+      Sequelize.useCLS(namespace);
+    } else {
+      Sequelize.cls = namespace;
+    }
+    resolve();
+  });
 }
 
 // sequelize 5 compat
@@ -241,7 +237,6 @@ describe('sequelize-version', () => {
   });
 
   it('must support cls transaction', done => {
-
     const ERR_MSG = 'ROLLBACK_CLS_TEST';
 
     const test = async () => {
@@ -381,8 +376,6 @@ describe('sequelize-version', () => {
 
     useCLS(Sequelize, namespace).then(test).then(result => {
       if (typeof result === 'error') return done(result);
-
-      console.log('result', result);
 
       const vs1 = result[0];
       const vs2 = result[1];

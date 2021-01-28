@@ -105,7 +105,7 @@ function Version(model, customOptions) {
   var versionFieldType = '' + attributePrefix + (underscored ? '_t' : 'T') + 'ype';
   var versionFieldId = '' + attributePrefix + (underscored ? '_i' : 'I') + 'd';
   var versionFieldTimestamp = '' + attributePrefix + (underscored ? '_t' : 'T') + 'imestamp';
-  var versionModelName = '' + capitalize(prefix) + capitalize(model.name);
+  var versionModelName = '' + capitalize(prefix) + capitalize(model.name) + capitalize(suffix);
 
   var versionAttrs = (_versionAttrs = {}, _defineProperty(_versionAttrs, versionFieldId, {
     type: Sequelize.BIGINT,
