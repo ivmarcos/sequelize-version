@@ -7,11 +7,14 @@ const namespace = cls.createNamespace('my-very-own-namespace');
 const env = process.env;
 
 function useCLS(Sequelize, namespace) {
-  if (Sequelize.useCLS) {
-    Sequelize.useCLS(namespace);
-  } else {
-    Sequelize.cls = namespace;
-  }
+  return new Promise((resolve) => {
+    if (Sequelize.useCLS) {
+      Sequelize.useCLS(namespace);
+    } else {
+      Sequelize.cls = namespace;
+    }
+    resolve();
+  });
 }
 
 // sequelize 5 compat
@@ -234,8 +237,6 @@ describe('sequelize-version', () => {
   });
 
   it('must support cls transaction', done => {
-    useCLS(Sequelize, namespace);
-
     const ERR_MSG = 'ROLLBACK_CLS_TEST';
 
     const test = async () => {
@@ -259,9 +260,7 @@ describe('sequelize-version', () => {
       }
     };
 
-    test()
-      .then(result => done(result))
-      .catch(err => done(err));
+    useCLS(Sequelize, namespace).then(test).then(result => done(result)).catch(err => done(err));
   });
 
   it('must support custom options', done => {
@@ -275,7 +274,6 @@ describe('sequelize-version', () => {
       }
     );
 
-    useCLS(Sequelize, namespace);
 
     const customOptions = {
       schema: 'test_custom',
@@ -291,13 +289,14 @@ describe('sequelize-version', () => {
       new Version(TestModel, customOptions)
     );
 
+    assert.equal(VersionModelWithCustomOptions.name, 'AuditTestLog');
     assert.equal(
       VersionModelWithCustomOptions.options.schema,
       customOptions.schema
     );
     assert.equal(
       `${customOptions.prefix}_${TestModel.options.tableName ||
-        TestModel.name}_${customOptions.suffix}`,
+      TestModel.name}_${customOptions.suffix}`,
       VersionModelWithCustomOptions.options.tableName
     );
 
@@ -331,7 +330,7 @@ describe('sequelize-version', () => {
     );
     assert.equal(
       `${customOptionsWithoutUnderscore.prefix}${TestModel.options.tableName ||
-        TestModel.name}${customOptionsWithoutUnderscore.suffix}`,
+      TestModel.name}${customOptionsWithoutUnderscore.suffix}`,
       VersionModelWithoutUnderscore.options.tableName
     );
 
@@ -375,53 +374,50 @@ describe('sequelize-version', () => {
       }
     };
 
-    test()
-      .then(result => {
-        if (typeof result === 'error') return done(result);
+    useCLS(Sequelize, namespace).then(test).then(result => {
+      if (typeof result === 'error') return done(result);
 
-        console.log('result', result);
+      const vs1 = result[0];
+      const vs2 = result[1];
+      const vs3 = result[2];
+      const testInstance = result[3];
 
-        const vs1 = result[0];
-        const vs2 = result[1];
-        const vs3 = result[2];
-        const testInstance = result[3];
+      const attributes = Object.keys(TestModel.rawAttributes);
+      const attributesVersionCustomOptions = Object.keys(
+        VersionModelWithCustomOptions.rawAttributes
+      );
+      const attributesVersionWithoutUnderscore = Object.keys(
+        VersionModelWithoutUnderscore.rawAttributes
+      );
 
-        const attributes = Object.keys(TestModel.rawAttributes);
-        const attributesVersionCustomOptions = Object.keys(
-          VersionModelWithCustomOptions.rawAttributes
-        );
-        const attributesVersionWithoutUnderscore = Object.keys(
-          VersionModelWithoutUnderscore.rawAttributes
-        );
+      const attributesCloned = attributes.filter(
+        attr => customOptions.exclude.indexOf(attr) === -1
+      );
 
-        const attributesCloned = attributes.filter(
-          attr => customOptions.exclude.indexOf(attr) === -1
-        );
+      assert.equal(
+        attributesCloned.length,
+        attributes.length - customOptions.exclude.length
+      );
+      assert.equal(
+        attributesVersionCustomOptions.length,
+        attributes.length - customOptions.exclude.length + 3
+      );
+      assert.equal(
+        attributesVersionWithoutUnderscore.length,
+        attributes.length - customOptionsWithoutUnderscore.exclude.length + 3
+      );
+      assert.equal(vs1.length, 1);
+      assert.equal(vs2.length, 1);
+      assert.equal(vs3.length, 1);
 
-        assert.equal(
-          attributesCloned.length,
-          attributes.length - customOptions.exclude.length
-        );
-        assert.equal(
-          attributesVersionCustomOptions.length,
-          attributes.length - customOptions.exclude.length + 3
-        );
-        assert.equal(
-          attributesVersionWithoutUnderscore.length,
-          attributes.length - customOptionsWithoutUnderscore.exclude.length + 3
-        );
-        assert.equal(vs1.length, 1);
-        assert.equal(vs2.length, 1);
-        assert.equal(vs3.length, 1);
+      attributesCloned.forEach(attr => {
+        assert.deepEqual(vs1[0][attr], testInstance[attr]);
+        assert.deepEqual(vs2[0][attr], testInstance[attr]);
+        assert.deepEqual(vs3[0][attr], testInstance[attr]);
+      });
 
-        attributesCloned.forEach(attr => {
-          assert.deepEqual(vs1[0][attr], testInstance[attr]);
-          assert.deepEqual(vs2[0][attr], testInstance[attr]);
-          assert.deepEqual(vs3[0][attr], testInstance[attr]);
-        });
-
-        done();
-      })
+      done();
+    })
       .catch(err => done(err));
   });
 

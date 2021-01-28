@@ -111,7 +111,7 @@ function Version(model, customOptions) {
   const versionFieldTimestamp = `${attributePrefix}${
     underscored ? '_t' : 'T'
   }imestamp`;
-  const versionModelName = `${capitalize(prefix)}${capitalize(model.name)}`;
+  const versionModelName = `${capitalize(prefix)}${capitalize(model.name)}${capitalize(suffix)}`;
 
   const versionAttrs = {
     [versionFieldId]: {
