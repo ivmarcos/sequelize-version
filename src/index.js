@@ -103,7 +103,7 @@ function Version(model, customOptions) {
   const attributePrefix = options.attributePrefix || options.prefix;
   const tableName = `${
     prefix ? `${prefix}${tableUnderscored ? '_' : ''}` : ''
-  }${model.options.tableName || model.name}${
+  }${model.options.tableName || model.options.freezeTableName ? model.name : `${model.name}s`}${
     suffix ? `${tableUnderscored ? '_' : ''}${suffix}` : ''
   }`;
   const versionFieldType = `${attributePrefix}${underscored ? '_t' : 'T'}ype`;
