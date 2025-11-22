@@ -1,59 +1,85 @@
 {
   "name": "sequelize-version",
-  "version": "0.0.58",
-  "description": "Automatically version (audit, log) your sequelize models",
-  "main": "index.js",
-  "keywords": [
-    "sequelize",
-    "version",
-    "audit",
-    "log",
-    "history"
+  "version": "2.0.0",
+  "description": "Automatically version (audit, log) your Sequelize models with TypeScript support",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
-    "pretest": "yarn build",
-    "test": "mocha",
-    "test:dev": "nodemon --exec 'yarn test' --ignore node_modules --ignore index.js ",
-    "build": "babel src -o index.js",
-    "preversion": "yarn test",
-    "version": "git add --all",
-    "release": "yarn version --new-version patch",
-    "postversion": "git push",
-    "precommit": "lint-staged"
-  },
-  "lint-staged": {
-    "*.{css,md,js,json}": [
-      "prettier-eslint --write",
-      "git add"
-    ]
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:docker": "docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from test",
+    "db:up": "docker-compose up -d",
+    "db:down": "docker-compose down",
+    "db:reset": "docker-compose down -v && docker-compose up -d",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ivmarcos/sequelize-version.git"
   },
-  "author": "Marcos Andrei Ivanechtchuk",
+  "keywords": [
+    "sequelize",
+    "version",
+    "audit",
+    "log",
+    "history",
+    "track",
+    "changes",
+    "diff",
+    "typescript",
+    "orm",
+    "database"
+  ],
+  "author": "Marcos Vinicius <ivmarcos@gmail.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/ivmarcos/sequelize-version/issues"
   },
-  "homepage": "https://github.com/ivmarcos/sequelize-version#readme",
-  "devDependencies": {
-    "babel-cli": "^6.24.1",
-    "babel-plugin-transform-decorators-legacy": "^1.3.4",
-    "babel-plugin-transform-remove-console": "^6.8.4",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-stage-0": "^6.24.1",
-    "continuation-local-storage": "^3.2.0",
-    "dotenv": "^5.0.1",
-    "eslint": "^4.3.0",
-    "husky": "^0.14.3",
-    "lint-staged": "^7.1.3",
-    "mocha": "^5.2.0",
-    "pg": "^7.4.3",
-    "prettier-eslint-cli": "^4.7.1",
-    "sequelize": "*"
-  },
+  "homepage": "https://ivmarcos.github.io/sequelize-version",
   "peerDependencies": {
-    "sequelize": ">= 3.x <= 5.x"
+    "sequelize": ">=3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "dotenv": "^16.3.1",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
+    "pg": "^8.11.3",
+    "pg-hstore": "^2.3.4",
+    "prettier": "^3.1.0",
+    "sequelize": "^6.35.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.0",
+    "vitepress": "^1.0.0-rc.31",
+    "vitest": "^1.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }

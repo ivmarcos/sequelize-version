@@ -1,187 +1,206 @@
-[![Build Status](https://travis-ci.org/ivmarcos/sequelize-version.svg?branch=master)](https://travis-ci.org/ivmarcos/sequelize-version)
 # sequelize-version
-Automatically version (audit, log) your sequelize models, tracking all the changes (create, update, delete) by generating a version of the model than can be used for easy
-querying, see the changes made, or whatever you want. The version model uses sequelize hooks to persist the data.
+
+[![npm version](https://img.shields.io/npm/v/sequelize-version.svg)](https://www.npmjs.com/package/sequelize-version)
+[![npm downloads](https://img.shields.io/npm/dm/sequelize-version.svg)](https://www.npmjs.com/package/sequelize-version)
+[![CI](https://github.com/ivmarcos/sequelize-version/actions/workflows/ci.yml/badge.svg)](https://github.com/ivmarcos/sequelize-version/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/ivmarcos/sequelize-version/branch/master/graph/badge.svg)](https://codecov.io/gh/ivmarcos/sequelize-version)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+[![Sequelize](https://img.shields.io/badge/Sequelize-v3--v7-green.svg)](https://sequelize.org/)
+
+Automatically version (audit, log) your Sequelize models, tracking all changes (create, update, delete) with TypeScript support.
+
+📖 **[Full Documentation](https://ivmarcos.github.io/sequelize-version)**
+
+## Features
+
+- 📝 **Automatic Versioning** - Track every create, update, and delete
+- 🔍 **Diff Tool** - Compare versions to see exactly what changed
+- 👤 **Custom Attributes** - Add userId, IP address, changedFields, etc.
+- 🔒 **Transaction Support** - Full support including CLS
+- 📦 **TypeScript First** - Complete type definitions
+- 🔄 **Sequelize v3-v7** - Compatible with all major versions
 
 ## Installation
 
-```shell
-npm i sequelize-version --save
+```bash
+npm install sequelize-version
 ```
-or
-```shell
-yarn add sequelize-version
-```
-## Features
 
-* Custom settings (version prefix, suffix, schema and more)
-* Supports transaction 
+## Quick Start
 
+```typescript
+import { Version, VersionType } from 'sequelize-version';
+import { Sequelize, DataTypes } from 'sequelize';
 
-## Usage
-```js
-const Sequelize = require('sequelize');
-const Version = require('sequelize-version');
+const sequelize = new Sequelize('database', 'user', 'password', {
+  dialect: 'postgres',
+});
 
-const sequelize = new Sequelize(...);
+const User = sequelize.define('User', {
+  name: DataTypes.STRING,
+  email: DataTypes.STRING,
+});
 
-const Person = sequelize.define('Person', ...);
+// Create version model
+const UserVersion = Version(User);
 
-const PersonVersion = new Version(Person);
+// Sync database
+await sequelize.sync();
+
+// Changes are automatically tracked
+const user = await User.create({ name: 'John', email: 'john@example.com' });
+
+user.name = 'John Doe';
+await user.save();
+
+// Query versions
+const versions = await user.getVersions();
+// or
+const allVersions = await User.getVersions({ where: { name: 'John Doe' } });
 ```
 
 ## Options
 
-|Name             |Type               |Default       |Description
-|-----------------|-------------------|--------------|--------------------------------
-|prefix           | `string`          | `'version'`  | Prefix for table name and version attributes
-|suffix           | `string`          |              | Table name suffix
-|attributePrefix  | `string`          |              | Overrides prefix for version attribute fields
-|schema           | `string`          |              | Version model schema, uses origin model schema as default
-|sequelize        | `sequelize`       |              | Sequelize instance, uses origin model sequelize as default
-|exclude          | `Array<string>`   |              | Attributes to ignore 
-|tableUnderscored | `boolean`         |   `true`     | Use underscore in version table name
-|underscored      | `boolean`         |   `true`     | Use underscore in version attributes
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `prefix` | `string` | `'version'` | Table name and attribute prefix |
+| `suffix` | `string` | `''` | Table name suffix |
+| `attributePrefix` | `string` | value of `prefix` | Override prefix for attributes |
+| `schema` | `string` | `''` | Database schema |
+| `sequelize` | `Sequelize` | source model's | External Sequelize instance |
+| `exclude` | `string[]` | `[]` | Attributes to exclude |
+| `tableUnderscored` | `boolean` | `true` | Use underscores in table name |
+| `underscored` | `boolean` | `true` | Use underscores in attributes |
+| `customAttributes` | `object` | `{}` | Additional version attributes |
+| `customAttributeResolver` | `function` | - | Resolve custom attribute values |
+| `trackChangedFields` | `boolean` | `false` | Track which fields changed |
 
-## Examples
+## Custom Attributes
 
-### Checking versions
-```js
-// let's create a person for test
-let person = await Person.build({name: 'Jack'}).save();
+Track who made changes and from where:
 
-// now we change a name
-person.name = 'Jack Johnson';
-
-// update 
-await person.save();
-
-// and delete
-await person.destroy();
-
-// finally, get the versions
-const versions = await PersonVersion.findAll({where : {id: person.id}});
-
-// or, even simpler
-const versionsByInstance = await person.getVersions();
-
-// this way too
-const versionsByModel = await Person.getVersions({where : {id: person.id}});
-
-// versions added
-console.log(JSON.parse(JSON.stringify(versions)));
-/*
-[
-    {
-        version_id: 1,
-        version_type: 1,
-        version_timestamp: 2017-08-02T16:08:09.956Z,
-        id: 1,
-        name: 'Jack'
+```typescript
+const UserVersion = Version(User, {
+  customAttributes: {
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
-    {
-        version_id: 2,
-        version_type: 2,
-        version_timestamp: 2017-08-02T16:18:09.958Z,
-        id: 1,
-        name: 'Jack Johnson'
+    ipAddress: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
-    {
-        version_id: 3,
-        version_type: 3,
-        version_timestamp: 2017-08-02T16:18:09.959Z,
-        id: 1,
-        name: 'Jack Johnson'
-    },
-]
-*/
-```
-### Custom options
-```js
-//customization examples
-const customOptions = {
-    
-    //table name and version attributes prefix
-    prefix: '', 
-
-    //table name suffix
-    suffix: 'log', 
-
-    //attribute prefix (overrides default - prefix)
-    attributePrefix: 'revision', 
-
-    //version model schema
-    schema: 'audit',
-
-    //you can use another sequelize instance (overrides default - sequelize from origin model)
-    sequelize: new Sequelize(...), 
-
-    //attributes to ignore from origin model
-    exclude: ['createdAt', 'updatedAt'],
-
-    //table name with underscore, true as default
-    tableUnderscored: true,
-
-    //attributes with underscore, true as default
-    underscored: true,
-
-}
-
-// single options
-const VersionModel = new Version(Model, customOptions);
-
-// global options
-Version.defaults = customOptions;
+  },
+  customAttributeResolver: (context) => ({
+    userId: getCurrentUserId(),
+    ipAddress: getClientIP(),
+  }),
+  trackChangedFields: true,
+});
 ```
 
+## Diff Tool
 
-### Transaction
-```js
-//version uses the origin model transaction
-sequelize.transaction(transaction => {
-    return Person.build({name: 'Jack'}).save({transaction});
+Compare versions to see what changed:
+
+```typescript
+const versions = await UserVersion.findAll({
+  where: { id: userId },
+  order: [['version_id', 'ASC']],
 });
 
-//or, if you are using cls - http://docs.sequelizejs.com/manual/tutorial/transactions.html#automatically-pass-transactions-to-all-queries
-sequelize.transaction(() => {
-    return Person.build({name: 'Jack'}).save();
-})
+const diff = UserVersion.diff(versions[0], versions[1]);
+
+console.log(diff.modified);
+// { name: { oldValue: 'John', newValue: 'John Doe' } }
+
+const summary = UserVersion.summarizeDiff(diff);
+// ['Modified "name": "John" → "John Doe"']
+
+// Get full history with diffs
+const history = await UserVersion.getHistory({ id: userId });
 ```
 
-### Querying
-```js
-// default scopes created in version model (created, updated, deleted)
-const versionCreated = await VersionModel.scope('created').find({where: {id: person.id}});
+## Scopes
 
-const versionUpdates = await VersionModel.scope('updated').findAll();
+Built-in scopes for filtering:
 
-const versionDeleted = await VersionModel.scope('deleted').find({where: {id: person.id}});
-
-// using origin model
-const allVersions = await Person.getVersions({where : {name: {like: 'Jack%'}}});
-
-// using instance from origin model
-const person = await Person.findById(1);
-const versionsForOnlyThisPerson = await person.getVersions({where: {name: {like: '%Johnson'}}});
+```typescript
+const created = await UserVersion.scope('created').findAll();
+const updated = await UserVersion.scope('updated').findAll();
+const deleted = await UserVersion.scope('deleted').findAll();
 ```
 
-### Important Notes
-This lib uses sequelize hooks to be able to track the changes. When using class methods, it is necessary to use the ```individualHooks: true``` option to make this possible. In such cases, this can cause a dramatic reduction in performance. See more at: https://sequelize.org/master/manual/hooks.html.
-```js
-// This will select all records that are about to be deleted and emit `beforeDestroy` and `afterDestroy` on each instance.
-await Model.destroy({
-  where: { accessLevel: 0 },
-  individualHooks: true
+## Transactions
+
+Versions respect transactions:
+
+```typescript
+await sequelize.transaction(async (t) => {
+  const user = await User.create({ name: 'John' }, { transaction: t });
+  // Version is created within the same transaction
+  // If transaction rolls back, version is also rolled back
+});
+```
+
+## Global Defaults
+
+Set defaults for all Version calls:
+
+```typescript
+Version.defaults = {
+  prefix: 'audit',
+  exclude: ['password', 'token'],
+};
+```
+
+## TypeScript
+
+Full TypeScript support with type definitions:
+
+```typescript
+import {
+  Version,
+  VersionType,
+  VersionOptions,
+  VersionDiff,
+  VersionContext
+} from 'sequelize-version';
+```
+
+## Documentation
+
+📖 **[Full Documentation](https://ivmarcos.github.io/sequelize-version)**
+
+- [Getting Started](https://ivmarcos.github.io/sequelize-version/guide/getting-started)
+- [Custom Attributes](https://ivmarcos.github.io/sequelize-version/guide/custom-attributes)
+- [Diff Tool](https://ivmarcos.github.io/sequelize-version/guide/diff-tool)
+- [API Reference](https://ivmarcos.github.io/sequelize-version/api/)
+
+## Important Notes
+
+When using bulk methods like `Model.destroy()` or `Model.update()`, you need to enable `individualHooks: true` to track changes:
+
+```typescript
+await User.destroy({
+  where: { status: 'inactive' },
+  individualHooks: true, // Required for versioning
 });
 
-// This will select all records that are about to be updated and emit `beforeUpdate` and `afterUpdate` on each instance.
-await Model.update({ username: 'Jack' }, {
-  where: { accessLevel: 0 },
-  individualHooks: true
-});
-
+await User.update(
+  { status: 'active' },
+  {
+    where: { id: 1 },
+    individualHooks: true, // Required for versioning
+  }
+);
 ```
+
+## Contributing
+
+Contributions are welcome! Please read our contributing guidelines and submit pull requests.
 
 ## License
 
-The files included in this repository are licensed under the MIT license.
+MIT © [Marcos Vinicius](https://github.com/ivmarcos)
